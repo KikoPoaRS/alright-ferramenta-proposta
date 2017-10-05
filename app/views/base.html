@@ -1,0 +1,146 @@
+
+
+{% set __BASEHTML__ = baseUrl() ~ "/app/views/" %} 
+{% set __BASESITE__ = baseUrl() %} 
+
+
+
+<!doctype html>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Alright - Ferramenta Proposta</title>
+
+    <!-- Bootstrap -->
+    <link href="{{ __BASEHTML__ }}vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ __BASEHTML__ }}vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    
+    {% block scriptscss %}{% endblock %}
+    
+    <!-- Custom Theme Style -->
+    <link href="{{ __BASEHTML__ }}css/main.css?{{random()}}" rel="stylesheet">
+    <link href="{{ __BASEHTML__ }}css/custom.css?{{random()}}" rel="stylesheet">
+
+    <script type="text/javascript">var __BASEHTML__ = '{{__BASEHTML__}}'; </script>
+    <script type="text/javascript">var __BASESITE__ = '{{__BASESITE__}}'; </script>
+  </head>
+
+  <body class="nav-sm">
+    <div class="container body">
+      <div class="main_container" style="height:100vh;">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="index.html" class="site_title"> <img id="logo-ar" src="{{ __BASEHTML__ }}imgs/logo-alright-menor.png" alt=""></a>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <br />
+
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+                <ul class="nav side-menu">
+                  <li><a><i class="fa fa-clone"></i> Propostas <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="index.html">Listagem de propostas</a></li>
+                      <li><a href="index2.html">Criar / editar propostas</a></li>
+                    </ul>
+                  </li>
+
+                  <li><a><i class="fa fa-table"></i> Dados de referência <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="tables.html">Informações de base</a></li>
+                      <li><a href="tables_dynamic.html">Tabelas de veículos</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+            <!-- /sidebar menu -->
+
+            <!-- /menu footer buttons -->
+            <!-- <div class="sidebar-footer hidden-small">
+              <a data-toggle="tooltip" data-placement="top" title="Settings">
+                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+              </a>
+              <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+              </a>
+              <a data-toggle="tooltip" data-placement="top" title="Lock">
+                <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+              </a>
+              <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+              </a>
+            </div> -->
+            <!-- /menu footer buttons -->
+          </div>
+        </div>
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav>
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+
+              <ul class="nav navbar-nav navbar-right">
+                <li class="">
+                    <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+                        <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                      </a>
+                </li>
+
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <!-- /top navigation -->
+
+        <!-- page content -->
+        <div class="right_col" role="main" style="min-height:100%!important">
+            <div class="">
+                {% block conteudo %}{% endblock %}
+            </div>
+        </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+       <!-- <footer>
+           <div class="pull-right">
+            Gentelella - Bootstrap Admin Template by <a href="https://colorlib.com">Colorlib</a>
+          </div> 
+          <div class="clearfix"></div>
+        </footer>-->
+        <!-- /footer content -->
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="{{ __BASEHTML__ }}vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="{{ __BASEHTML__ }}vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- FastClick -->
+    <script src="{{ __BASEHTML__ }}vendors/fastclick/lib/fastclick.js"></script>
+    
+    {% block scriptsjs %}{% endblock %}
+    
+    <!-- Custom Theme Scripts -->
+    <script src="{{ __BASEHTML__ }}js/main.js?{{random()}}"></script>
+  </body>
+</html>
+
+
+ 

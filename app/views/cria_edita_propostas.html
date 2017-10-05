@@ -1,0 +1,186 @@
+
+{% extends "base.html" %}
+
+{% block scriptscss %}
+    <!-- NProgress -->
+    <link href="{{ __BASEHTML__ }}vendors/nprogress/nprogress.css" rel="stylesheet">
+{% endblock %}
+
+{% block conteudo %}
+
+
+<div class="page-title">
+    <div class="title_left">
+    <h4>Propostas > Nova proposta</h4>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12" style="width:100%">
+        <div class="x_panel">
+            <div class="x_title">
+            <h2>Dados gerais </h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+            <div class="btn-toolbar editor">
+                
+            </div>
+            </div>
+        </div>
+
+        <div id="container-bts-veiculos" class="bts-propostas-canais">
+            <!-- <a id="bt-produto-alright" class="btn btn-app ativo" style="border-bottom: 3px solid #6c00e9;">
+                <img src="{{ __BASEHTML__ }}imgs/bt-produto-alright-ativo.png" alt="">
+            </a>
+
+            <a id="bt-produto-alright2" class="btn btn-app">
+                <img src="{{ __BASEHTML__ }}imgs/bt-produto-alright-inativo.png" alt="">
+            </a> -->
+        </div>
+
+        <div id="container-veiculos" class="bloco-veiculos">
+
+            <!-- <div class="x_panel" style="border-left: 3px solid #6c00e9;">
+                <div class="x_title">
+                    <h2>Button App Design</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                    </ul>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    
+       
+                    <div class="accordion" id="accordion1" role="tablist" aria-multiselectable="true">
+                            <div class="panel">
+                                <a class="panel-heading" role="tab" id="headingOne1" data-toggle="collapse" data-parent="#accordion1" href="#collapseOne1" aria-expanded="true" aria-controls="collapseOne">
+                                    <h4 class="panel-title" style="display:inline-block">Nome produto</h4>
+
+                                </a>
+
+
+                                 <div class="resumo-veiculo" style="margin-top:-30px;">
+                                    <div style="display:inline-block" id="cab-produto-periodo-${this._produtoID}">10/10/17 a 10/11/17</div>
+                                    <div style="display:inline-block" id="cab-produto-investimento-${this._produtoID}">R$ 00.000,00</div>
+                                    <div style="display:inline-block" id="cab-produto-select-segmentacao-${this._produtoID}">
+                                        <select id="select-produto-${this._produtoID}">
+                                            <option value="">a</option>
+                                            <option value="">b</option>
+                                        </select>
+                                    </div>
+                                    <div id="btexcluir-produto-${this._produtoID}" class="bt-fechar" onclick="">X</div>
+                                </div>
+
+
+                                <div id="collapseOne1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                                    <div class="panel-body" style="padding: 7px 0;">
+                                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding: 0;/*border: 1px solid blue*/">
+
+                                            <label class="col-sm-1 colunas-label-produtos form-group" style="width: 35px;">Target</label>
+                                            <div class="col-sm-2 colunas-form-produtos form-group">
+                                                <input id="target-" type="text" placeholder="AB+18" class="form-control">
+                                            </div>
+                                            
+                                            <label class="col-sm-1 colunas-label-produtos form-group" style="width: 33px;">Praça</label>
+                                            <div class="col-sm-2 colunas-form-produtos form-group">
+                                                 <input id="praca-" type="text" placeholder="AB+18" class="form-control">
+                                            </div>
+                                            
+                                            <label class="col-sm-1 colunas-label-produtos form-group" style="width: 47px;">Formato</label>
+                                            <div class="col-sm-2 colunas-form-produtos form-group">
+                                                <select id="formato-" class="form-control select-menor">
+                                                    <option>asdf asdf aasdfas</option>
+                                                    <option>asdf asdf a</option>
+                                                    <option>asdf asdf a</option>
+                                                    <option>asdf asdf a</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <label class="col-sm-1 colunas-label-produtos form-group" style="width: 82px;">Desc. máximo</label>
+                                            <div id="desconto-" class="col-sm-2 colunas-form-produtos form-group" style="font-weight: 600; color: black; padding-top: 4px; width: 15px; font-size:9pt;">
+                                                20%
+                                            </div>
+
+                                            <div class="col-sm-2 colunas-form-produtos form-group" style="padding-right: 0; position: relative; float: right;width: 95px;">
+                                                <button type="button" class="btn btn-default" style="font-size: 8pt; color:#9c9b9b; float:right; margin-right:0; padding:5px 12px;">Inserir período</button>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+
+                </div>
+            </div> -->
+
+
+        </div>
+
+        <!--  -->
+
+    </div>
+</div>
+
+
+
+<!--<div class="container-geral">
+    <div class="bt-inserir-veiculo" onclick="novoVeiculo('SmartClip')">Smart Clip</div>
+    <div class="bloco-veiculos" id="container-veiculos" style="">
+
+
+         <div class="bloco-card" style="border-left:2px solid red">
+            <div class="cabecalho-card">
+                <div class="logo-veiculo">logo</div>
+                <div class="nome-veiculo">Nononon <span id="#cab-veiculo-contagem-">0</span></div>
+                <div class="resumo-veiculo">
+                    <div style="display:inline-block" id="cab-veiculo-periodo-">10/10/17 a 10/11/17</div>
+                    <div style="display:inline-block" id="cab-veiculo-investimento-">R$ 00.000,00</div>
+                    <div style="display:inline-block" id="cab-veiculo-select-segmentacao-">
+                        <select>
+                            <option value="volvo">Volvo</option>
+                            <option value="saab">Saab</option>
+                            <option value="mercedes">Mercedes</option>
+                            <option value="audi">Audi</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="container-produtos-${veiculoId}">
+                <div class="cabecalho-produtos">
+                    <div class="tit-produto">${nomeProduto}</div>
+                    <div class="resumo-veiculo">
+                            <div style="display:inline-block" id="cab-produto-periodo-">10/10/17 a 10/11/17</div>
+                            <div style="display:inline-block" id="cab-produto-investimento-">R$ 00.000,00</div>
+                            <div style="display:inline-block" id="cab-produto-select-segmentacao-">
+                                <select>
+                                    <option value="volvo">Volvo</option>
+                                    <option value="saab">Saab</option>
+                                    <option value="mercedes">Mercedes</option>
+                                    <option value="audi">Audi</option>
+                                </select>
+                            </div>
+                            <div class="bt-fechar" onclick="">X</div>
+                        </div>
+                </div>
+            </div>
+        </div> 
+
+        
+    </div>
+</div>-->
+{% endblock %}
+
+{% block scriptsjs %}
+    <script src="{{ __BASEHTML__ }}js/classes/proposta.js?{{random()}}"></script>
+    <script src="{{ __BASEHTML__ }}js/secoes/componentes_cria_edita_proposta.js?{{random()}}"></script>
+    <script src="{{ __BASEHTML__ }}js/secoes/cria_edita_proposta.js?{{random()}}"></script>
+{% endblock %}

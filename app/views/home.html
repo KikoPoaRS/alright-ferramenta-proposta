@@ -1,0 +1,133 @@
+
+
+{% extends "base.html" %}
+
+{% block conteudo %}
+    <header class="topo">
+           <img src="{{ __BASEHTML__ }}imgs/assinaturasite.svg" width="468" height="auto"  id="logo">
+    </header>
+    
+    <div class="conteudo">
+       
+        <div class="bloco-frase">
+            <div class="Grid conteudo-bloco container-bloco-frase">
+                <div class="Grid-cell bloco-grid-fix">Produção&nbsp; </div>
+                <img class="Grid-cell bloco-grid-fix chaves" src="{{ __BASEHTML__ }}imgs/chave-e.svg">
+                <div id="conteudo-chaves">  design  |  desenvolvimento  |  gerenciamento  </div>
+                <img class="Grid-cell bloco-grid-fix chaves" src="{{ __BASEHTML__ }}imgs/chave-d.svg">
+                <div class="Grid-cell bloco-grid-fix"> de projetos web e mobile apps </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="bloco-projetos">
+            <div class="conteudo-bloco">
+                <p class="subtitulo" style="margin-top: 50px;">Projetos recentes</p>
+                <div class="Grid" style="padding:20px 0;">
+
+                    {% for card in cards %}
+                    
+                    <div class="Grid-cell bloco-grid-fix card-projeto">
+                        <div class="container-img"><img src="{{ __BASEHTML__ }}imgs/thumb-{{card.slug}}.jpg" alt="thumb {{card.slug}}"></div>
+                         <div class="card-tit">{{card.nome}}</div>
+                         <div class="card-txt">{{card.resumo}}</div>
+                        <div class="bt-proj-detalhes" onmouseover="overBt(this);" onmouseout="outBt(this);" onclick="location.href='./projetos/{{card.slug}}'"><div class="mais" style="display:inline-block;">+</div> <div style="display:inline-block;">&nbsp; Detalhes</div></div>
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="bloco-expertises">
+            <div class="conteudo-bloco">
+                <p class="subtitulo" style="color:white;">Expertises</p>
+                <div class="Grid">
+                    <div class="Grid-cell bloco-grid-fix item-expertise">
+                        <div class="ico-expertise">
+                             <img src="{{ __BASEHTML__ }}imgs/ico-projetos.svg" alt="">
+                        </div>
+                        <p class="tit-icos">Escopo de Projeto</p>
+                        <p class="txt-icos">
+                           Análise e documentação de escopo de projeto - necessidades, recursos, custos e prazos  com geração de gráfico de Gantt.
+                        </p>
+                    </div>
+                    <div class="Grid-cell bloco-grid-fix item-expertise">
+                        <div class="ico-expertise">
+                            <img src="{{ __BASEHTML__ }}imgs/ico-design.svg" alt="">
+                        </div>
+                        <p class="tit-icos">Arquitetura e Design de Interface</p>
+                        <p class="txt-icos">
+                            Planejamento geral - estrutura de navegação, lógica de negócios, comportamento de usuário, criação e design de interfaces.
+                        </p>
+                    </div>
+                    <div class="Grid-cell bloco-grid-fix item-expertise">
+                        <div class="ico-expertise">
+                            <img src="{{ __BASEHTML__ }}imgs/ico-develop.svg" alt="">
+                        </div>
+                        <p class="tit-icos">Desenvolvimento</p>
+                        <p class="txt-icos">
+                            Codificação front-end  /  back-end baseada em linguages web para  produção de sites, web apps e  apps mobile híbridos .
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+         <div class="mensagem" href="#area-formulario">
+            <div class="circulo"></div>
+            <div class="circulo interno"></div>
+            <div class="textocirc">Deixe sua mensagem!</div>
+        </div>
+
+
+
+        <div class="bloco-formulario">
+            <div class="conteudo-bloco">
+                <div class="conteudo-formulario" >
+                    <form id="formulario" action="index.php" method="post" autocomplete="off">
+                        <div>
+                            <label for="nome">Nome</label>
+                            <div class="alerta">Digite o nome corretamente!</div>
+                            <input type="text" name="nome" id="form-nome"/>
+                        </div>
+
+                        <div>
+                            <label for="mail">E-mail</label>
+                            <div class="alerta">Insira o e-mail corretamente!</div>
+                            <input type="email" name="mail" id="form-mail"/>
+                        </div>
+
+                        <div>
+                            <label for="fone">Telefone</label>
+                            <div class="alerta">Insira o telefone corretamente!</div>
+                            <input type="text" name="fone" id="form-fone" maxlength="15" />
+                            
+                        </div>
+                        
+                        <div>
+                            <label for="msg">Mensagem</label>
+                            <div class="alerta">Escreva uma mensagem!</div>
+                            <textarea name="msg" id="form-msg" ></textarea>
+                        </div>
+                    
+                        <div style="width:100%;">
+                            <div id="btEnviar" class="bt-enviar">Enviar</div>
+                            <div id="feedback"></div>
+                        </div>
+                    </form>
+                </div> <!--  +++++++ FIM DO conteudo-formulario ++++++  -->
+            </div>
+        </div>
+    </div> 
+
+    <footer>{% include "footer.html" %}</footer>
+    
+{% endblock %}
