@@ -185,3 +185,14 @@ function ativaColapsedPanel(elm = '.collapse-link'){
         $ICON.toggleClass('fa-chevron-up fa-chevron-down');
     });
 }
+
+
+function callModalMenor(tit, message){
+    $('#titulo-modal-menor').empty();
+    $('#titulo-modal-menor').append(tit);
+
+    $('#corpo-modal-menor').empty();
+    $('#corpo-modal-menor').append(message);
+
+    $('#modal-menor').modal('show');
+}

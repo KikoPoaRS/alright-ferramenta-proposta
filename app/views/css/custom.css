@@ -45,7 +45,11 @@
     line-height: 1.95;
 }
 
-/* altera o bg do painel de accordion*/
+.bt-fechar.tabela {
+    margin-left: 0;
+}
+
+/* altera painel de accordion*/
 .accordion .panel:hover {
     background: #FFFFFF;
 }
@@ -57,6 +61,11 @@
     font-size: 13px;
 }
 
+/* altera tables */
+.table {
+    margin-bottom: 0px;
+}
+
 /* ////////////// */
 
 .colunas-form-produtos {
@@ -66,7 +75,8 @@
     margin-bottom: 5px;
 }
 
-.colunas-form-produtos .form-control{
+.colunas-form-produtos .form-control,
+.container-periodos .form-control{
    height: 25px;
    font-size: 8.5pt;
 }
@@ -82,4 +92,58 @@
 .colunas-label-produtos.col-sm-1 {
     font-weight: 600;
     padding: 5px 0 0 0;
+}
+
+.container-periodos {
+    width: 100%;
+    padding: 0 5px;
+    border: 5px solid #ebebeb;
+    margin: -13px 0 -4px 0;
+}
+
+.container-periodos > .table > thead > tr > th {
+    padding: 3px;
+    font-size: 8.5pt;
+    padding-left: 0;
+    padding-right: 7px;
+}
+
+.container-periodos > .table > tbody > tr > td {
+    font-size: 8.5pt;
+    padding-left: 0;
+    padding-right: 7px;
+    vertical-align: middle;
+}
+
+.infos-rodape-produto {
+    color: #BEBEBE;
+    font-size: 8.5pt;
+    width: 100%;
+    padding: 12px 0;
+}
+
+.bt-fechar-tabela {
+    /* border: 1px solid red; */
+    padding: 8px 5px 8px 0!important;
+    width: 10px;
+}
+
+/* controles do ion.rangeSlider */
+.irs-min, .irs-max, .irs-from, .irs-to {
+    top:6px;
+}
+.irs {
+    height: 35px;
+}
+
+td > .irs{
+    position: relative;
+    top: -9px;
+}
+
+/* modais */
+@media (min-width: 768px){
+    .modal-sm {
+        width: 430px;
+    }
 }
