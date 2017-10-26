@@ -57,21 +57,21 @@ var CURRENT_URL = window.location.href.split('#')[0].split('?')[0],
 	
 // Sidebar
 function init_sidebar() {
-// TODO: This is some kind of easy fix, maybe we can improve this
-var setContentHeight = function () {
-	// reset height
-	$RIGHT_COL.css('min-height', $(window).height());
+    // TODO: This is some kind of easy fix, maybe we can improve this
+    var setContentHeight = function () {
+        // reset height
+        $RIGHT_COL.css('min-height', $(window).height());
 
-	var bodyHeight = $BODY.outerHeight(),
-		footerHeight = $BODY.hasClass('footer_fixed') ? -10 : $FOOTER.height(),
-		leftColHeight = $LEFT_COL.eq(1).height() + $SIDEBAR_FOOTER.height(),
-		contentHeight = '100%';//bodyHeight < leftColHeight ? leftColHeight : bodyHeight;
+        var bodyHeight = $BODY.outerHeight(),
+            footerHeight = $BODY.hasClass('footer_fixed') ? -10 : $FOOTER.height(),
+            leftColHeight = $LEFT_COL.eq(1).height() + $SIDEBAR_FOOTER.height(),
+            contentHeight = '100%';//bodyHeight < leftColHeight ? leftColHeight : bodyHeight;
 
-	// normalize content
-	contentHeight -= $NAV_MENU.height() + footerHeight;
+        // normalize content
+        contentHeight -= $NAV_MENU.height() + footerHeight;
 
-	$RIGHT_COL.css('min-height', contentHeight);
-};
+        $RIGHT_COL.css('min-height', contentHeight);
+    };
 
   $SIDEBAR_MENU.find('a').on('click', function(ev) {
 	  console.log('clicked - sidebar_menu');
@@ -147,11 +147,11 @@ $MENU_TOGGLE.on('click', function() {
 		});
 	}
 };
-// /Sidebar
 
-	var randNum = function() {
-	  return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
-	};
+// /Sidebar
+var randNum = function() {
+    return (Math.floor(Math.random() * (1 + 40 - 20))) + 20;
+};
 
 
 // Panel toolbox
@@ -184,10 +184,14 @@ function ativaColapsedPanel(elm = '.collapse-link'){
 
         $ICON.toggleClass('fa-chevron-up fa-chevron-down');
     });
+
+    $('.collapsed').css('height', 'auto');
+    $('.collapsed').find('.x_content').css('display', 'none');
+    $('.collapsed').find('i').toggleClass('fa-chevron-up fa-chevron-down');
 }
 
 
-function callModalMenor(tit, message){
+function callModalMenor(tit, message, functionOk, functionFechar){
     $('#titulo-modal-menor').empty();
     $('#titulo-modal-menor').append(tit);
 
@@ -195,4 +199,116 @@ function callModalMenor(tit, message){
     $('#corpo-modal-menor').append(message);
 
     $('#modal-menor').modal('show');
+
+    $('#bt-modal-menor-ok').click(function(){
+        $('#modal-menor').modal('hide');
+        if(functionOk) $('#bt-modal-menor-ok').unbind( "click", functionOk );
+    });
+
+    $('#bt-modal-menor-fechar').click(function(){
+        $('#modal-menor').modal('hide');
+        if(functionOk) $('#bt-modal-menor-fechar').unbind( "click", functionFechar );
+    });
+
+    if(functionOk){
+        $('#bt-modal-menor-ok').show();
+        $('#bt-modal-menor-ok').click(functionOk);
+    } else {
+        $('#bt-modal-menor-ok').hide();
+    }
+
+    if(functionFechar) $('#bt-modal-menor-fechar').click(functionFechar);
+   
+}
+
+
+// INICIALIZA COMPONENTES
+$(document).ready(function() {
+    init_sidebar();
+
+    // inicializa tooltip
+    $('[data-toggle="tooltip"]').tooltip({
+        container: 'body'
+    });
+    
+});
+
+
+function formataDado (dado, formato = 'R$', reverse = false){
+    /**
+     * dado: conteúdo a ser formatado
+     * reverse: "desformata" o dado, tornando ele compatível ao cálculo
+     * Tipo de formatoa aplciado ao dado
+     */
+    var saida = dado;
+   
+    if(formato == 'int'){
+        var p = String(dado);
+        var conta = 0;
+        var final = '';
+        
+        for(var i=p.length-1; i>=0; i--){
+            if(++conta == 4 ){
+                conta = 1;
+                final = p.charAt(i)+'.'+final;
+            } else {
+                final = p.charAt(i)+final;
+            }
+        }
+        saida = final;
+    }
+
+    if(formato == 'R$'){
+        if(dado == '' || dado == undefined || dado == null || dado == 0){
+            saida = reverse ? '0.0' : '0,00';
+
+        } else {
+            if(String(dado).length<3) return dado+',00';
+
+            var nros  = String(dado).split(reverse ? ',' : '.');
+            var pre   = '';
+            var pos   = '00';
+            var saida = '';
+            
+            var sm = '.';
+            var sf = reverse ? '.' : ',';
+            
+            if(String(nros[0]).length<4){
+                pre = nros[0];    
+            } else {
+                if(reverse){
+                    pre = String(nros[0]).replace(/\./g, '');
+                } else {
+                     if(String(nros[0]).indexOf(",") >= 0){
+                        pre = String(nros[0]).replace(/,/g, ".");
+                    } else {
+                        var p     = String(nros[0]);
+                        var conta = 0;
+                        var final = '';
+                        
+                        for(var i=p.length-1; i>=0; i--){
+                            final = p.charAt(i)+final;
+                            
+                            if(++conta == 3){
+                                conta = 0;
+                                final = sm+final;
+                            }
+                        }
+                        pre = final;
+                    }
+                }
+            }
+            
+            if(nros[1]){
+                pos = nros[1];
+                if(String(nros[1]).length == 1) pos += "0";
+            } else {
+                pos = '00';
+            }
+            
+            saida = pre+sf+pos;
+        }
+    }
+
+    return saida;
 }

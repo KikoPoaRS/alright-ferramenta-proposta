@@ -16,7 +16,7 @@
 
 <div class="page-title">
     <div class="title_left">
-    <h4>Propostas > Nova proposta</h4>
+    <h4>Propostas <i class="fa fa-arrow-right setatitulo"></i> Criar proposta</h4>
     </div>
 </div>
 
@@ -34,13 +34,56 @@
             <div class="clearfix"></div>
             </div>
             <div class="x_content">
-            <div class="btn-toolbar editor">
-                
-            </div>
+                <div class="btn-toolbar editor">
+                    <div class="Grid campos-dados-porposta form-group" style="padding:5px 0 0 0; margin: 0;">
+                        <label class="colunas-label-produtos form-group" style="/*width: 53px;*/">Agências</label>
+                        <div class="Grid-cell colunas-form-produtos form-group">
+                            <select id="proposta-agencia" class="form-control select-menor">
+                                <option value="">Escolha</option>
+                                <option value="Sem agência">Sem agência</option>
+                                <option value="Paim">Paim</option>
+                                <option value="Matriz">Matriz</option>
+                            </select>
+                        </div>
+
+                        <label class="colunas-label-produtos form-group" style="/*width: 43px;">Clientes</label>
+                        <div class="Grid-cell colunas-form-produtos form-group">
+                            <select id="proposta-cliente" class="form-control select-menor">
+                                <option value="">Escolha</option>
+                                <option value="Zaffari">Zaffari</option>
+                                <option value="Unisinos">Unisinos</option>
+                                <option value="RBS">Gerdau</option>
+                            </select>
+                        </div>
+                        
+                        <label class="colunas-label-produtos form-group" style="width: 85px;">Desc. cliente (%)</label>
+                        <div class="colunas-form-produtos form-group" style="width: 60px;">
+                            <input id="proposta-desconto-cliente" type="text" class="form-control" style="padding:6px; text-align:center">
+                        </div>
+
+                        <label class="colunas-label-produtos form-group" style="/*width: 35px;*/">Título</label>
+                        <div class="Grid-cell colunas-form-produtos form-group">
+                            <input id="proposta-titulo" type="text" class="form-control">
+                        </div>
+                        
+                        <label class="colunas-label-produtos form-group" style="/*width: 47px;*/">Contato</label>
+                        <div class="Grid-cell colunas-form-produtos form-group">
+                            <input id="proposta-contato" type="text" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                 <div style="position: relative; padding-right: 0; bottom: -11px; margin-top: -6px;">
+                     <div style="float:left; padding-left:3px; padding-top:6px;">
+                        <div style="display:inline-block" >Período da proposta: <span id="">De 10/10/17 a 10/11/17</div>
+                        <div style="display:inline-block"> &nbsp; | &nbsp;  Investimento total: R$ <span id="" style="font-weight:600; color:#738cb9">0,00</span></div>
+                     </div>
+                    <button class="btn btn-primary" style="float:right; font-size: 9pt; margin-left:5px; margin-bottom:5px;" type="button">Salvar proposta</button>
+                    <button class="btn btn-danger" style="float:right; font-size: 9pt;" type="button">Excluir proposta</button>
+                </div>
             </div>
         </div>
 
-        <div id="container-bts-veiculos" class="bts-propostas-canais">
+        <div id="container-bts-veiculos" class="Grid bts-propostas-canais">
             <!-- <a id="bt-produto-alright" class="btn btn-app ativo" style="border-bottom: 3px solid #6c00e9;">
                 <img src="{{ __BASEHTML__ }}imgs/bt-produto-alright-ativo.png" alt="">
             </a>
@@ -62,8 +105,7 @@
                     <div class="clearfix"></div>
                 </div>
                 <div class="x_content">
-                    
-       
+
                     <div class="accordion" id="accordion1" role="tablist" aria-multiselectable="true">
                             <div class="panel">
                                 <a class="panel-heading" role="tab" id="headingOne1" data-toggle="collapse" data-parent="#accordion1" href="#collapseOne1" aria-expanded="true" aria-controls="collapseOne">
@@ -186,9 +228,13 @@
                             </div>
                     </div>
 
+                    <div class="col-xs-12" style="margin: 6px 0 -10px 0; padding-right:0;">
+                        <button class="btn btn-primary" style="float:right; font-size: 9pt;" type="button">Salvar veículo</button>
+                        <button class="btn btn-danger" style="float:right; font-size: 9pt;" type="button">Excluir veículo</button>
+                    </div>
                 </div>
-            </div>
- -->
+            </div> -->
+
 
         </div>
 
@@ -198,55 +244,6 @@
 </div>
 
 
-
-
-
-
-<!--<div class="container-geral">
-    <div class="bt-inserir-veiculo" onclick="novoVeiculo('SmartClip')">Smart Clip</div>
-    <div class="bloco-veiculos" id="container-veiculos" style="">
-
-
-         <div class="bloco-card" style="border-left:2px solid red">
-            <div class="cabecalho-card">
-                <div class="logo-veiculo">logo</div>
-                <div class="nome-veiculo">Nononon <span id="#cab-veiculo-contagem-">0</span></div>
-                <div class="resumo-veiculo">
-                    <div style="display:inline-block" id="cab-veiculo-periodo-">10/10/17 a 10/11/17</div>
-                    <div style="display:inline-block" id="cab-veiculo-investimento-">R$ 00.000,00</div>
-                    <div style="display:inline-block" id="cab-veiculo-select-segmentacao-">
-                        <select>
-                            <option value="volvo">Volvo</option>
-                            <option value="saab">Saab</option>
-                            <option value="mercedes">Mercedes</option>
-                            <option value="audi">Audi</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div id="container-produtos-${veiculoId}">
-                <div class="cabecalho-produtos">
-                    <div class="tit-produto">${nomeProduto}</div>
-                    <div class="resumo-veiculo">
-                            <div style="display:inline-block" id="cab-produto-periodo-">10/10/17 a 10/11/17</div>
-                            <div style="display:inline-block" id="cab-produto-investimento-">R$ 00.000,00</div>
-                            <div style="display:inline-block" id="cab-produto-select-segmentacao-">
-                                <select>
-                                    <option value="volvo">Volvo</option>
-                                    <option value="saab">Saab</option>
-                                    <option value="mercedes">Mercedes</option>
-                                    <option value="audi">Audi</option>
-                                </select>
-                            </div>
-                            <div class="bt-fechar" onclick="">X</div>
-                        </div>
-                </div>
-            </div>
-        </div> 
-
-        
-    </div>
-</div>-->
 {% endblock %}
 
 {% block scriptsjs %}

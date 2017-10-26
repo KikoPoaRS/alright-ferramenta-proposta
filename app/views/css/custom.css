@@ -1,6 +1,115 @@
 /************************************************/
 /*********** CLASSES PERSONALIZADAS *************/
 
+/* tela login */
+.login_wrapper { max-width: 360px;}
+.login_content h1:after, 
+.login_content h1:before {
+    width: 110px;
+}
+
+.login-erro-msg {
+    color:rgb(165, 1, 1);
+    text-align:center;
+    font-size: 8.5pt;
+    margin: -10px 0 10px 0;
+}
+
+.setatitulo {
+    font-size: 9pt;
+    position: relative;
+    top: -2px;
+}
+
+.x_title h2 {
+    /* color: black; */
+    font-size: 11pt;
+    font-weight: 600;
+}
+
+.container-thumb-veiculos {
+    width: 300px;
+    padding-top: 6px;
+}
+.thumbs-veiculos {
+    width: 25px;
+    height: 25px;
+}
+
+.thumbs-veiculos img {
+    width: 25px;
+    height: 25px;
+}
+
+.rodape-tabela-veiculos {
+    width: 100%;
+    color: #ccccca;
+    border-top: 1px solid #dcdcdc; 
+    padding: 12px 0 0 0;
+    margin: 0 0 -4px 0;
+}
+/* --------- */
+
+
+/* tabela de veiculos */
+.table, .x_content, .form-control, .btn {font-size: 8.5pt;}
+.dataTables_filter { width: 100%; }
+.box-veiculo-tabela {
+    width:10px;
+    height:15px;
+}
+
+.bt-acoes {
+    padding: 2px;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 9pt;
+    margin: 0 auto;
+}
+
+.radio-cria-registro {
+    margin-top: 5px;
+    padding-left: 8px;   
+}
+
+.tabelas-veiculos > tbody > tr > td {padding: 8px 8px 2px 8px;}
+
+.radio-cria-registro.label-radio {margin-top: 7px;}
+
+.radio-tabela {
+    padding-left: 8px;
+    position: relative;
+    top: 5px; 
+}
+
+.radio-tabela.label-radio {top: 2px;}
+
+/* .radio > input {position: relative;} */
+
+/* --------- */
+
+.container-cria-registro {
+    background-color: #ececec;
+    padding: 15px 10px;
+}
+
+.elm-cria-registro {
+    padding-right: 8px;
+}
+.elm-cria-registro.texto {
+    padding-top: 6px;
+}
+
+.form-control {
+    height: 30px;
+}
+
+.btn {
+    height: 30px;
+    margin: 0;
+}
+
+
 .bts-propostas-canais {
     margin: 10px -9px;
 }
@@ -15,6 +124,14 @@
     margin-left: 0px;
     width: 40px;
     height: auto;
+}
+
+.logo-ico-tabela {
+    float: left;
+    height: 25px;
+    width: auto;
+    margin-left: 0px;
+    margin-right: 10px;
 }
 
 .resumo-veiculo {
@@ -120,6 +237,7 @@
     font-size: 8.5pt;
     width: 100%;
     padding: 12px 0;
+    margin-bottom: 20px;
 }
 
 .bt-fechar-tabela {
@@ -127,6 +245,17 @@
     padding: 8px 5px 8px 0!important;
     width: 10px;
 }
+
+.Grid.campos-dados-porposta {
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+}
+
+/* .Grid.bts-propostas-canais {
+    justify-content: space-between;
+    -webkit-justify-content: space-between;
+} */
+
 
 /* controles do ion.rangeSlider */
 .irs-min, .irs-max, .irs-from, .irs-to {

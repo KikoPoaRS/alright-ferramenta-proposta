@@ -26,6 +26,7 @@
     {% block scriptscss %}{% endblock %}
     
     <!-- Custom Theme Style -->
+    <link href="{{ __BASEHTML__ }}css/grid.css" rel="stylesheet">
     <link href="{{ __BASEHTML__ }}css/main.css?{{random()}}" rel="stylesheet">
     <link href="{{ __BASEHTML__ }}css/custom.css?{{random()}}" rel="stylesheet">
 
@@ -33,13 +34,13 @@
     <script type="text/javascript">var __BASESITE__ = '{{__BASESITE__}}'; </script>
   </head>
 
-  <body class="nav-sm">
+  <body class="nav-md">
     <div class="container body">
       <div class="main_container" style="height:100vh;">
         <div class="col-md-3 left_col">
           <div class="left_col scroll-view">
             <div class="navbar nav_title" style="border: 0;">
-              <a href="index.html" class="site_title"> <img id="logo-ar" src="{{ __BASEHTML__ }}imgs/logo-alright-menor.png" alt=""></a>
+              <a href="{{ urlFor ('login')}}" class="site_title"> <img id="logo-ar" src="{{ __BASEHTML__ }}imgs/logo-alright.png" alt=""></a>
             </div>
 
             <div class="clearfix"></div>
@@ -52,15 +53,15 @@
                 <ul class="nav side-menu">
                   <li><a><i class="fa fa-clone"></i> Propostas <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="index.html">Listagem de propostas</a></li>
-                      <li><a href="index2.html">Criar / editar propostas</a></li>
+                      <li><a href="{{ urlFor ('lista-propostas')}}">Listagem de propostas</a></li>
+                        <li><a href=" {{ urlFor ('edita-proposta')}} ">Criar / editar propostas</a></li>
                     </ul>
                   </li>
 
                   <li><a><i class="fa fa-table"></i> Dados de referência <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
-                      <li><a href="tables.html">Informações de base</a></li>
-                      <li><a href="tables_dynamic.html">Tabelas de veículos</a></li>
+                      <li><a href="{{ urlFor ('infos-base')}}">Informações de base</a></li>
+                      <li><a href="{{ urlFor ('tabelas-veiculos')}}">Tabelas de veículos</a></li>
                     </ul>
                   </li>
                 </ul>
@@ -98,7 +99,7 @@
 
               <ul class="nav navbar-nav navbar-right">
                 <li class="">
-                    <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+                    <a data-toggle="tooltip" data-placement="top" title="Sair" href="{{ urlFor ('closesession')}}">
                         <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
                       </a>
                 </li>
@@ -136,6 +137,9 @@
     <script src="{{ __BASEHTML__ }}vendors/fastclick/lib/fastclick.js"></script>
 
     <script src="{{ __BASEHTML__ }}vendors/moment/min/moment.min.js"></script>
+
+    <script src="{{ __BASEHTML__ }}js/underscore-min.js"></script>
+
     
     {% block scriptsjs %}{% endblock %}
     

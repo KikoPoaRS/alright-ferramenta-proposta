@@ -1,0 +1,143 @@
+
+{% extends "base.html" %}
+
+{% block scriptscss %}
+    <!-- NProgress -->
+    <link href="{{ __BASEHTML__ }}vendors/nprogress/nprogress.css" rel="stylesheet">
+    
+    <!-- Ion.RangeSlider -->
+    <link href="{{ __BASEHTML__ }}vendors/normalize-css/normalize.css" rel="stylesheet">
+    <link href="{{ __BASEHTML__ }}vendors/ion.rangeSlider/css/ion.rangeSlider.css" rel="stylesheet">
+    <link href="{{ __BASEHTML__ }}vendors/ion.rangeSlider/css/ion.rangeSlider.skinFlat.css" rel="stylesheet">
+{% endblock %}
+
+{% block conteudo %}
+
+
+<div class="page-title">
+    <div class="title_left">
+    <h4>Dados de referência <i class="fa fa-arrow-right setatitulo"></i> Tabela de veículos</h4>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12" style="width:100%">
+            {% for veiculo in listaVeiculos %}
+            <div class="x_panel {% if loop.index > 1 %} collapsed {% endif %}" style="border-left: 5px solid {{veiculo.cor}};{% if loop.index > 1 %} margin-top: 20px;{% endif %}">
+                <div class="x_title" style="padding:0; ">
+                    <img class="logo-ico-veiculo" src="{{ __BASEHTML__ }}imgs/{{veiculo.thumb}}">
+                    <h2>{{veiculo.nome}}</h2>
+                    <ul class="nav navbar-right panel_toolbox">
+                        <li><a id="cl-${this._veiculoID}" class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                        </li>
+                    </ul>
+    
+                    <div class="resumo-veiculo">
+                        <div style="display:inline-block" > <span id="cab-veiculo-modelos-{{ veiculo.id }}" style="color:inherit; font-weight:600;">{{veiculo.listaRegras|length}}</span> modelo{% if veiculo.listaRegras|length > 1 %}s{% endif %}</div>
+                        
+                        <div style="display:inline-block; margin-left:5px;">
+                            <button class="btn btn-default" style="color: #9c9b9b; margin-bottom:6px;" type="button" onclick="inserirNovaRegra({{ veiculo.id }})">Incluir novo modelo</button>
+                        </div>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                </div>
+                <div class="x_content">
+                    <table class="table table-striped tabelas-veiculos" style="margin-top:-10px;">
+                        <thead>
+                            <tr>
+                                <th style="width:40px; text-align:center;"># ID</th>
+                                <th style="width:140px;">Produto</th>
+                                <th>Segmentação</th>
+                                <th>Formato</th>
+                                <th style="width: 105px;">Invest. Min.(R$)</th>
+                                <th>Tipo compra</th>
+                                <th style="width: 68px;">CUB*(R$)</th>
+                                <th style="width: 95px;">Desc. Max.(%)</th>
+                                <th style="width: 60px; text-align:center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-regras-{{ veiculo.id }}">
+                            {% if veiculo.listaRegras %}
+                                {% for REGRA in veiculo.listaRegras %}
+                                <tr id="registro-{{REGRA.id}}">
+                                    <td style="padding-top:14px; text-align:center;">{{REGRA.id}}</td>
+                                    <td>
+                                        <select class="form-control select-menor" id="veic-produto-{{ REGRA.id }}">
+                                            {{REGRA.produto|raw}}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-control select-menor" id="veic-segmentacao-{{ REGRA.id }}">
+                                                {{REGRA.segmentacao|raw}}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-control select-menor" id="veic-formato-{{ REGRA.id }}">
+                                                {{REGRA.formato|raw}}
+                                        </select>
+                                    </td>
+                                    <td><input type="text" id="veic-invstmin-{{ REGRA.id }}" class="form-control mask-moeda" style="height:28px; text-align:center; padding:6px;" value="{{REGRA.invest_minimo}}"></td>
+                                    <td>
+                                        <select class="form-control select-menor" id="veic-tipocompra-{{ REGRA.id }}">
+                                                {{REGRA.compra|raw}}
+                                        </select>
+                                    </td>
+                                    <td><input type="text" id="veiculo-cub-{{ REGRA.id }}" class="form-control mask-moeda" style="height:28px; width:60px;  text-align:center; padding:6px;" value="{{REGRA.cub}}"></td>
+                                    <td><input type="text" id="veic-descmax-{{ REGRA.id }}" class="form-control mask-pct" style="width:60px; height:28px; text-align:center; padding:6px;" value="{{REGRA.desconto_max}}"></td>
+                                    <td style="padding-top: 5px;">
+                                        <div style="padding: 4px 0; text-align:center;">
+                                            <div style="padding: 4px 0; text-align:center;">
+                                                <button onclick="editarExcluirRegra({{ REGRA.id }},{{veiculo.id}},'{{veiculo.nome}}',0)" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Salvar registro"><i class="fa fa-save"></i></button>
+                                                <button onclick="editarExcluirRegra({{ REGRA.id }},{{veiculo.id}},'{{veiculo.nome}}',-1)" type="button" class="btn btn-round btn-danger bt-acoes" data-toggle="tooltip" data-placement="top" title="Excluir registro"> <span style="position:relative; top:-7px;">x</span> </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr id="sem-regras-{{veiculo.id}}"> <td colspan="9" style="text-align:center; padding-bottom:8px;">Não há regras cadastradas para este veículo!</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <div class="rodape-tabela-veiculos">
+                        *CUB: Custo Unitário Bruto
+                    </div>
+                </div>
+            </div> 
+
+            {% endfor %}
+
+           
+            
+
+        {% include "modal-menor.html" %}
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scriptsjs %}
+    <script>
+        var selectsCompras = '{{selectsCompras|raw}}';
+        var selectsItens = {
+            {% for veiculo in listaVeiculos %}
+                'veiculo_{{veiculo.id}}' : {
+                    nome:'{{veiculo.nome}}',
+                    produtos:'{{veiculo.produtos|raw}}',
+                    segmentacoes:'{{veiculo.segmentacoes|raw}}',
+                    formatos:'{{veiculo.formatos|raw}}'
+                },
+            {% endfor %}
+            }
+    </script>
+    <script src="{{ __BASEHTML__ }}vendors/ion.rangeSlider/js/ion.rangeSlider.min.js"></script>
+    <script src="{{ __BASEHTML__ }}vendors/jquery-mask/jquery.mask.min.js"></script>
+    <script src="{{ __BASEHTML__ }}js/secoes/tabelas_veiculos.js?{{random()}}"></script>
+
+{% endblock %}

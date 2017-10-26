@@ -1,29 +1,47 @@
 
+//////////////////////////////////////////////////////////////
+// FUNÇÕES DE SUPORTE ////////////////////////////////////////
+
+function excluirVeiculo(idv,nome){
+    callModalMenor('Confirma excluir veículo '+nome+'!', 
+    'Todos os produtos e períodos do veículo selecionado serão excluidos da tela de edição e da base de dados.',
+    function(){document.dispatchEvent(new CustomEvent("eventoExcluiCard",{ "detail": {'veiculoID':idv} }));});
+}
+
+function salvarProposta(){
+    // TODO ///////////////////
+}
+
+
+//////////////////////////////////////////////////////////////
+// CLASSES DE CONTROLE ///////////////////////////////////////
 
 // *********************************************************
-// ****************** BOTÕES PRODUTO **********************
+// ****************** BOTÕES PRODUTO ***********************
 // *********************************************************
 var BtVeiculo = (function(){
     // construtor
     function BtVeiculo(id,logo,nome,cor,status,escopo,baseHTML,veiculo){
-
         this._id       = id;
         this._logo     = logo;
         this._cor      = cor;
         this._nome     = nome;
         this._status   = status;
         this._baseHtml = baseHTML;
-        this._$escopo  = $(escopo).append('<div id="btGeral-produto-'+id+'"></div>');
+        
+        $(escopo).append('<div id="btGeral-produto-'+id+'"></div>');
+        
+        this._$escopo  = $('#btGeral-produto-'+id);
 
         this._btATIVO   = `
-        <a class="btn btn-app ativo" style="border-bottom: 3px solid #6c00e9;">
-            <img src="${baseHTML}imgs/${logo}-ativo.png">
+        <a class="btn btn-app ativo" style="border-bottom: 3px solid ${cor};">
+            <img src="${baseHTML}imgs/${logo.ativo}">
         </a>
         `;
         
         this._btINATIVO = `
         <a id="btp-${id}" class="btn btn-app">
-            <img src="${baseHTML}imgs/${logo}-inativo.png">
+            <img src="${baseHTML}imgs/${logo.inativo}">
         </a>
         `;
         
@@ -32,8 +50,7 @@ var BtVeiculo = (function(){
 
     var fn = BtVeiculo.prototype;
    
-    fn._renderBt = function(){
-        var self = this;        
+    fn._renderBt = function(){  
         this._$escopo.append(this._status ?  this.ativar() :  this.desativar());
     }
 
@@ -54,13 +71,15 @@ var BtVeiculo = (function(){
                 document.dispatchEvent(new CustomEvent("eventoCriaCard",{ "detail": {'veiculoID':self._id} }));
                 self.ativar();
             }
-            
         })
     }
 
     // expoe construtor
     return BtVeiculo;
 })();
+
+
+
 
 
 
@@ -74,6 +93,7 @@ var PeriodoProduto = (function(){
     function PeriodoProduto(id, idp, regras, container){
         // objeto com as regras recebidas - nome | descontoMax | investMinimo | tipoCompra | CUB | CUL                     
         this._regrasPeriodo     = regras;
+        this._regrasPeriodo.CUB = parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
         this._produtoID         = idp;
         this._periodoID         = idp+'_'+id;
         this._$container        = $('#'+container);
@@ -89,10 +109,10 @@ var PeriodoProduto = (function(){
         this._mesAtivo          = (new Date).getMonth()+1;
         this._anoAtivo          = String((new Date).getFullYear()).substring(2,4);
         this._diaInit           = (new Date).getDay();                  
-        this._diaFim            = 15;   // valor default
+        this._diaFim            = (new Date).getDay() <= 15 ? 15 : this._listaDiasMeses[this._mesAtivo-1];   // valor default
         this._totalCustoBruto   = 0;
         this._volumeContratado  = 0;
-        this._desconto          = null;
+        this._desconto          = 0;
         this._CUB_N             = null;
         this._CUL_N             = null;
         this._totalCustoLiquido = null;
@@ -152,11 +172,11 @@ var PeriodoProduto = (function(){
             <td><span id="per-tipocompra-${this._periodoID}"></span></td>
             <td style="min-width:50px;">R$ <span id="per-CUB-${this._periodoID}"></span></td>
             <td style="min-width:50px;">R$ <span id="per-CUL-${this._periodoID}"></span></td>
-            <td style="max-width:65px;"><input id="per-desconto-${this._periodoID}" type="text" class="form-control" value=""></td>
+            <td style="max-width:65px;"><input id="per-desconto-${this._periodoID}" type="text" class="form-control" value="" style="width:55px;"></td>
             <td style="min-width:50px;">R$ <span id="per-CUBN-${this._periodoID}"></span></td>
             <td style="min-width:50px;">R$ <span id="per-CULN-${this._periodoID}"></span></td>
-            <td style="min-width: 85px;"><div style="color:black; font-weight:600">$R <span id="per-totliquido-${this._periodoID}"></span></div></td>
-            <td class="bt-fechar-tabela"><div id="per-btexcluir-${this._periodoID}" class="bt-fechar tabela">X</div></td>
+            <td style="min-width: 85px;"><div style="color:black; font-weight:600">R$ <span id="per-totliquido-${this._periodoID}"></span></div></td>
+            <td class="bt-fechar-tabela"><div  id="per-btexcluir-${this._periodoID}" class="bt-fechar tabela">X</div></td>
         </tr>
         `;
 
@@ -180,21 +200,47 @@ var PeriodoProduto = (function(){
         this._$elmTotBruto.mask('000.000.000,00', {reverse: true});
         this._$elmDesconto.mask('00,00', {reverse: true});
 
+        // eventos de controles
+        var self = this;
+
+        document.addEventListener('aplicaRegrasProdutoss',function (e) {
+            // e.detail.periodoID)
+            self.aplicaRegras();
+        });
+        
         this._$elmTotBruto.keyup(function() {
-            // console.log('investimento '+this.value)
+           var valor = this.value;
+            if( valor == '') valor = '0';
+            self._totalCustoBruto = parseFloat(formataDado(valor, 'R$', true));
+            self.aplicaRegras();
+            document.dispatchEvent(new CustomEvent("eventoAtualizaCabecalhoProduto",{ "detail": {'periodoID':self._periodoID} }));
         });
 
-        this._$elmTotBruto.keyup(function() {
-            // console.log('desconto '+this.value)
+        this._$elmDesconto.keyup(function() {
+            var valor = this.value;
+            if( valor == '') valor = '0';
+            self._desconto = parseFloat(formataDado(valor, 'R$', true));
+            self.aplicaRegras();
+            document.dispatchEvent(new CustomEvent("eventoAtualizaCabecalhoProduto",{ "detail": {'periodoID':self._periodoID} }));
         });
+
+        this._$elmDesconto.blur(function(){
+            var dmax = parseFloat(formataDado(self._regrasPeriodo.descontoMax,'R$',true));
+            if(parseFloat(self._desconto)>dmax){
+                self._desconto = dmax;
+                self._$elmDesconto.val(self._regrasPeriodo.descontoMax);
+                // chamas modal de alert para aviso sobre limite de desconto
+                callModalMenor('ATENÇÃO : Limite de desconto excedido!', 'O desconto máximo a ser aplicado ao cliente deve ser de <strong>'+self._regrasPeriodo.descontoMax+'%<strong>');
+            }
+        })
 
         // ativa slider de datas
         this._$elmSliderDias.ionRangeSlider({type: "double", min: 1, max: 31, from: this._diaInit, to: this._diaFim, onFinish: this._onSliderDias, self:this});// grid: true,
         this._atualizaInfosSliderDias();
 
         // ativa bt excluir
-        var self = this;
-        $('#per-btexcluir-'+this._periodoID).click(function() { console.log('clicando no excluir...'+self._periodoID)
+       
+        $('#per-btexcluir-'+this._periodoID).click(function() {
             document.dispatchEvent(new CustomEvent("eventoExcluiPeriodo",{ "detail": {'periodoID':self._periodoID} }));
         })
 
@@ -242,104 +288,50 @@ var PeriodoProduto = (function(){
     }
 
     fn.aplicaRegras = function(regras){
-       if(regras) this._regrasPeriodo = regras;
-
-       // executa os cálculas
-       // TODO
-       this._totalCustoBruto   = this._$elmTotBruto.val();
-       this._volumeContratado  = 0;
-       this._desconto          = this._$elmDesconto.val();;
-       this._CUB_N             = 0;
-       this._CUL_N             = 0;
-       this._totalCustoLiquido = 0;
-
-       // configura regras de dias dos meses
-       this._atualizaInfosSliderDias();
-
-       // renderiza infos nos elementos
-
-       this._$elmVolContratado.empty();
-       this._$elmVolContratado.append(this._formataDado(this._volumeContratado));
-
-       this._$elmTipoCompra.empty();
-       this._$elmTipoCompra.append(this._regrasPeriodo.tipoCompra);
-
-       this._$elmCUB.empty();
-       this._$elmCUB.append(this._formataDado(this._regrasPeriodo.CUB));
-
-       this._$elmCUL.empty();
-       this._$elmCUL.append(this._formataDado(this._regrasPeriodo.CUL));
-
-       this._$elmCUB_N.empty();
-       this._$elmCUB_N.append(this._formataDado(this._CUB_N));
-
-       this._$elmCUL_N.empty();
-       this._$elmCUL_N.append(this._formataDado(this._CUL_N));
-
-       this._$elmTotLiquido.empty();
-       this._$elmTotLiquido.append(this._formataDado(this._totalCustoLiquido));
-    }
-
-    fn._formataDado = function(dado, formato = 'R$', reverse = false){
-        /**
-         * dado: conteúdo a ser formatado
-         * reverse: "desformata" o dado, tornando ele compatível ao cálculo
-         * Tipo de formatoa aplciado ao dado
-         */
-
-        var saida = dado;
-       
-        if(formato == 'R$'){
-            if(dado == '' || dado == undefined || dado == null || dado == 0){
-                saida = reverse ? '0.0' : '0,00';
-            } else {
-
-                var nros = dado.split(reverse ? ',' : '.');
-                var pre = '';
-                var pos = '00';
-                var saida = '';
-                
-                var sm = '.';
-                var sf = reverse ? '.' : ',';
-                
-                if(String(nros[0]).length<4){
-                    pre = nros[0];    
-                } else {
-                    if(reverse){
-                        pre = String(nros[0]).replace(/\./g, '');
-                    } else {
-                         if(String(nros[0]).indexOf(",") >= 0){
-                            pre = String(nros[0]).replace(/,/g, ".");
-                        } else {
-                            var p = String(nros[0]);
-                            var conta = 0;
-                            var final = '';
-                            
-                            for(var i=p.length-1; i>=0; i--){
-                    
-                                final = p.charAt(i)+final;
-                                
-                                if(++conta == 3){
-                                    conta = 0;
-                                    final = sm+final;
-                                }
-                            }
-                            pre = final;
-                        }
-                    }
-                
-                   
-                }
-                
-                if(nros[1]){
-                    pos = nros[1];
-                    if(String(nros[1]).length == 1) pos += "0";
-                }
-                
-                saida = pre+sf+pos;
-            }
+        if(regras) {
+            this._regrasPeriodo = regras;
+            this._regrasPeriodo.CUB =  parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
         }
-        return saida;
+
+
+
+        var descontoCliente = $inputDescClientes.val() == 0 || $inputDescClientes.val() == '' ? 20 : parseFloat(formataDado($inputDescClientes.val(),'R$',true));
+
+        // executa os cálculas                  
+        // this._regrasPeriodo.nome | .descontoMax | .investMinimo | .tipoCompra | .CUB | .CUL
+        this._totalCustoBruto   = this._$elmTotBruto.val() == '' ? 0 : parseFloat(formataDado(this._$elmTotBruto.val(),'R$',true));
+        this._desconto          = this._$elmDesconto.val() == '' ? 0 : parseFloat(formataDado(this._$elmDesconto.val(),'R$',true));
+        this._regrasPeriodo.CUL = (this._regrasPeriodo.CUB * (1-(descontoCliente/100))).toFixed(2);
+        this._CUB_N             = (this._regrasPeriodo.CUB * (1-(this._desconto/100))).toFixed(2);
+        this._CUL_N             = (this._regrasPeriodo.CUL * (1-(this._desconto/100))).toFixed(2);
+        this._totalCustoLiquido = (this._totalCustoBruto   * (1-(descontoCliente/100))).toFixed(2);
+        this._volumeContratado  = parseInt(Math.round(this._totalCustoBruto / this._CUB_N) * this._regrasPeriodo.tipoCompra[1]);
+
+        // configura regras de dias dos meses
+        this._atualizaInfosSliderDias();
+
+        // renderiza infos nos elementos
+
+        this._$elmVolContratado.empty();
+        this._$elmVolContratado.append(formataDado(this._volumeContratado,'int'));
+
+        this._$elmTipoCompra.empty();
+        this._$elmTipoCompra.append(this._regrasPeriodo.tipoCompra[0]);
+
+        this._$elmCUB.empty();
+        this._$elmCUB.append(formataDado(this._regrasPeriodo.CUB));
+
+        this._$elmCUL.empty();
+        this._$elmCUL.append(formataDado(this._regrasPeriodo.CUL));
+
+        this._$elmCUB_N.empty();
+        this._$elmCUB_N.append(formataDado(this._CUB_N));
+
+        this._$elmCUL_N.empty();
+        this._$elmCUL_N.append(formataDado(this._CUL_N));
+
+        this._$elmTotLiquido.empty();
+        this._$elmTotLiquido.append(formataDado(this._totalCustoLiquido));
     }
 
     fn.salvar = function(){
@@ -372,6 +364,10 @@ var PeriodoProduto = (function(){
         
         return p;
     }
+
+    fn.getInvestimento = function(){ return this._totalCustoBruto; }
+
+    fn.getDesconto = function(){ return this._desconto; }
     
     fn.getDados = function (){
         // TODO //////////////////////////////////
@@ -409,12 +405,14 @@ var ProdutoVeiculo = (function(){
         this._listaPeriodos      = [];
         this._dataInit           = '--';
         this._dataFim            = '--';
+        this._investimentoTotal  = 0;
 
         // elementos html
         this._$elmSelectFormatos = null;
         this._$elmDescontoMax    = null;
         this._$elmTabelaPeriodos = null;
         this._$elmCabProdutoPer  = null;
+        this._$elmCabProdutoInv  = null;
 
         ///////////////////////////////////////////
         // EVENTOS ////////////////////////////////
@@ -427,21 +425,7 @@ var ProdutoVeiculo = (function(){
             if(self._listaPeriodos.length == 1){
                 callModalMenor('Este período não pode ser excluido!', 'Cada produto selecionado deve ter no mínimo um período definido.'); // chamada à função externa da modal
             } else {
-                for(var i=0; i<self._listaPeriodos.length; i++){
-                    var p = self._listaPeriodos[i];
-
-                    if(e.detail.periodoID == p.getID()){
-                        p.excluir();
-                        self._listaPeriodos[i] = p = null;
-                        posPeriodo = i;
-                    }
-                }
-
-                // remove o período do array
-                if(posPeriodo > -1){
-                    self._listaPeriodos.splice(posPeriodo,1);
-                    self.atualizaDadosCabecalho();
-                } 
+                self._excluiPeriodos(e.detail.periodoID);
             }
         });
 
@@ -458,11 +442,36 @@ var ProdutoVeiculo = (function(){
         
         
         this._configuraSegmentacoes();
+        this.atualizaDadosCabecalho();
+
     }
 
     var fn = ProdutoVeiculo.prototype;
 
     // métodos privados
+    fn._excluiPeriodos = function(idp){
+        if(this._listaPeriodos.length > 0){
+            for(var i=0; i<this._listaPeriodos.length; i++){
+                var p = this._listaPeriodos[i];
+
+                if(!idp || idp == p.getID()){
+                    p.excluir();
+                    this._listaPeriodos[i] = p = null;
+                    posPeriodo = i;
+                }
+            }
+
+            // remove o período do array
+            if(!idp){
+                this._listaPeriodos = [];
+            } else {
+                if(posPeriodo > -1) this._listaPeriodos.splice(posPeriodo,1);
+            }
+            
+            this.atualizaDadosCabecalho();
+        }
+    }
+
     fn._configuraSegmentacoes = function(){
         this._selectSegmentacoes = [];
 
@@ -474,7 +483,8 @@ var ProdutoVeiculo = (function(){
         this._renderProduto();
     }
 
-    fn._ativarSegmentacao = function(segmentacao){ //console.log(this._produtoID+' :: segmentacao ativa '+segmentacao);
+    fn._ativarSegmentacao = function(segmentacao){ 
+        //console.log(this._produtoID+' :: segmentacao ativa '+segmentacao);
         // configura select de formatos    
         for(var i=0; i<this._listaSegmentacoes.length; i++){
             var seg = this._listaSegmentacoes[i];
@@ -495,15 +505,12 @@ var ProdutoVeiculo = (function(){
 
                 for(k=0; k<this._selectFormatos.length; k++){
                     var frms = this._selectFormatos[k];
-                    listaFrm += '<option value="'+frms+'">'+frms+'</option>';
-                }  
-                
+                    listaFrm += '<option value="'+frms+'">'+frms+'</option>'; 
+                }
+
                 this._$elmSelectFormatos.empty();
                 this._$elmSelectFormatos.append(listaFrm);
-
                 this._aplicarFormato(seg.formatos[0].nome);
-
-                // console.log('Montando formatos: '+JSON.stringify(this._listaFormatos, null, 4));
             }
         }
     }
@@ -555,7 +562,7 @@ var ProdutoVeiculo = (function(){
 
             <div class="resumo-veiculo" style="margin-top:-34px;">
                 <div style="display:inline-block" id="cab-produto-periodo-${this._produtoID}">De --- a ---</div>
-                <div style="display:inline-block">&nbsp | &nbsp  Investimento total: <span id="cab-produto-investimento-${this._produtoID}" style="font-weight:600; color:#738cb9">R$ 0,00</span></div>
+                <div style="display:inline-block">&nbsp | &nbsp  Investimento total: R$ <span id="cab-produto-investimento-${this._produtoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
 
                 <div style="display:inline-block; margin-left:5px;" id="cab-produto-select-segmentacao-${this._produtoID}">
                     <select id="select-produto-segmentacao-${this._produtoID}" class="form-control select-menor">${listaSegs}</select>
@@ -578,7 +585,7 @@ var ProdutoVeiculo = (function(){
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 47px;">Formato</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <select id="formato-${this._produtoID}" class="form-control select-menor"></select>
+                            <select id="formato-pr-${this._produtoID}" class="form-control select-menor"></select>
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 82px;">Desc. máximo</label>
@@ -625,10 +632,11 @@ var ProdutoVeiculo = (function(){
         // ativa componentes
         this._$escopoProdutos.append(containerProduto);
         this._$elementoProduto   = $('#el-produto-'+this._produtoID);
-        this._$elmSelectFormatos = $('#formato-'+this._produtoID);
+        this._$elmSelectFormatos = $('#formato-pr-'+this._produtoID);
         this._$elmDescontoMax    = $('#desconto-'+this._produtoID);
         this._$elmTabelaPeriodos = $('#tabela-periodos-'+this._produtoID);
         this._$elmCabProdutoPer  = $('#cab-produto-periodo-'+this._produtoID);
+        this._$elmCabProdutoInv  = $('#cab-produto-investimento-'+this._produtoID);
 
         var self = this; //
 
@@ -667,20 +675,22 @@ var ProdutoVeiculo = (function(){
 
         var dataInit, dataFim, di, df;
 
+        this._investimentoTotal = 0;
+
         for(var i=0; i<this._listaPeriodos.length; i++){
             var pr = this._listaPeriodos[i];
             var p = pr.getDatas();
             
             if(i == 0){
                 dataInit = parseInt(p.ano+p.mes+p.diaInit);
-                dataFim  = parseInt(p.ano+p.mes+p.diaInit);
+                dataFim  = parseInt(p.ano+p.mes+p.diaFim);
 
                 this._dataInit = p.fullInit;
                 this._dataFim  = p.fullFim;
 
             } else {
                 di = parseInt(p.ano+p.mes+p.diaInit);
-                df = parseInt(p.ano+p.mes+p.diaInit);
+                df = parseInt(p.ano+p.mes+p.diaFim);
 
                 if(di < dataInit){
                     dataInit = di;
@@ -692,11 +702,19 @@ var ProdutoVeiculo = (function(){
                     this._dataFim  = p.fullFim;
                 }
             }
+
+            // soma os custos brutos
+            this._investimentoTotal  += parseFloat(isNaN(pr.getInvestimento())?0:pr.getInvestimento()); 
         }
+
+        this._investimentoTotal = this._investimentoTotal.toFixed(2);
 
         // renderiza dados do período
         this._$elmCabProdutoPer.empty();
         this._$elmCabProdutoPer.append('De '+this._dataInit+' a '+this._dataFim);
+        
+        this._$elmCabProdutoInv.empty();
+        this._$elmCabProdutoInv.append(formataDado(this._investimentoTotal));
 
         ////////////////////////////////////////////////
         // atualiza dados do período
@@ -716,16 +734,25 @@ var ProdutoVeiculo = (function(){
         return this._produtoID;
     }
 
-    fn.getDados = function(){
-        
+    fn.getDados = function(){ }
+
+    fn.getDatas = function(){
+        return {dataInit:this._dataInit, dataFim:this._dataFim};
     }
 
-    fn.excluir = function(){
+    fn.getInvestimento = function(){
+        return this._investimentoTotal;
+    }
+
+    fn.excluirProduto = function(){
+        this._excluiPeriodos();
         this._$elementoProduto.remove();
     }
     // expoe construtor
     return ProdutoVeiculo;
 })();
+
+
 
 
 
@@ -742,18 +769,19 @@ var CardVeiculo = (function (){
         this._veiculoNome     = nome;
         this._veiculoCor      = cor;
         this._baseHtml        = baseHTML;
-        this._investTotal     = null;   // resultado do somatório dos produtos
-        this._listaMeses      = null;   // lista de meses da proposta
-        this._mesesUsados     = null;   // [mes de iníco, mes final]
         this._listaRegras     = regras; // recebe externo - todos os produtos e suas respectivas regras
         this._$escopoProdutos = null;   // recebe externo - escopo onde os cards serao inseridos
+        this._$painelXCard    = null;   // 
         this._produtosAtivos  = [];     // array com os produtos ativos no card do veículo
         this._selectProdutos  = [];     // array com os títulos dos produtos, para serem selecionados
         this._contaProduto    = 0;      // contador de produtos criados
         this._ativo           = false;  // inicia ativo somente se tiver os dados carregados da base
+        this._dataInit           = '--';
+        this._dataFim            = '--';
+        this._investimentoTotal  = 0;
 
         // referencias a componentes html
-        this._$escopoGeral          = $(escopo);
+        this._$escopoGeral       = $(escopo);
         // this._$elmPeriodo           = null;
         // this._$elmInvestimentoTotal = null;
         // this._$elmTotalProdutos     = null;
@@ -764,39 +792,23 @@ var CardVeiculo = (function (){
         var self = this;
 
         document.addEventListener('eventoExcluiProduto',function (e) {
-            var posProduto = -1;
-
-            for(var i=0; i<self._produtosAtivos.length; i++){
-                var p = self._produtosAtivos[i];
-
-                if(e.detail.produtoID == p.getID()){
-                    p.excluir();
-                    self._produtosAtivos[i] = p = null;
-                    posProduto = i;
-                    
-                }
-            }
-
-            // remove o produto do array de ativos
-            if(posProduto > -1){
-                self._produtosAtivos.splice(posProduto,1);
-                self.atualizaDadosCabecalho('contagem',self._produtosAtivos.length);
-            } 
+            self._excluiProdutos(e.detail.produtoID);
         });
 
         document.addEventListener('eventoCriaCard',function (e) {
             if(e.detail.veiculoID == self._veiculoID){
-                self.ativar(_MESES_PROPOSTA_);
+                self.ativar();
             }
         });
 
         document.addEventListener('eventoExcluiCard',function (e) {
             if(e.detail.veiculoID == self._veiculoID){
-                // TODO ////////////////////////////
+                self._excluiProdutos();
+                self.excluir();
             }
         });
 
-        document.addEventListener('eventoAtualizaCabecalhoVeiculo',function (e) { console.log('no veiculo evento '+e.detail.produtoID)
+        document.addEventListener('eventoAtualizaCabecalhoVeiculo',function (e) { //console.log('no veiculo evento '+e.detail.produtoID)
             for(var i=0; i<self._produtosAtivos.length; i++){
                 var p = self._produtosAtivos[i];
 
@@ -804,6 +816,7 @@ var CardVeiculo = (function (){
                     // TODO ////////////////////////////
                 }
             }
+            self.atualizaDadosCabecalho();
         })
 
         ////////////////////////////////////////////
@@ -818,6 +831,29 @@ var CardVeiculo = (function (){
     var fn = CardVeiculo.prototype;
 
     // métodos privados
+    fn._excluiProdutos = function(idp){
+        var posProduto = -1;
+        
+        for(var i=0; i<this._produtosAtivos.length; i++){
+            var p = this._produtosAtivos[i];
+
+            if(!idp || idp == p.getID()){
+                p.excluirProduto();
+                this._produtosAtivos[i] = p = null;
+                posProduto = i;
+            }
+        }
+
+        // remove o produto do array de ativos
+        if(!idp){
+            this._produtosAtivos = [];
+        } else {
+            if(posProduto > -1) this._produtosAtivos.splice(posProduto,1);
+        }
+        
+        this.atualizaDadosCabecalho();
+    }
+
     fn._configuraRegras = function(){
         // inicia gerando o select dos produtos
         for(var i=0; i<this._listaRegras.length; i++){
@@ -843,7 +879,7 @@ var CardVeiculo = (function (){
                 var novoProduto = new ProdutoVeiculo(this._veiculoID,++this._contaProduto ,itemProduto.nome, itemProduto.segmentacoes, this._$escopoProdutos);
 
                 this._produtosAtivos.push(novoProduto);
-                this.atualizaDadosCabecalho('contagem',this._produtosAtivos.length);
+                this.atualizaDadosCabecalho();
             }
         }
     }
@@ -856,9 +892,9 @@ var CardVeiculo = (function (){
         for(var i=0; i<this._selectProdutos.length; i++){ listaPs += '<option value="'+this._selectProdutos[i]+'">'+this._selectProdutos[i]+'</option>'; }
 
         var containerCard = `
-        <div class="x_panel" style="border-left: 3px solid ${this._veiculoCor};">
+        <div id="painel-x-card-${this._veiculoID}" class="x_panel" style="border-left: 3px solid ${this._veiculoCor};">
             <div class="x_title">
-                <img class="logo-ico-veiculo" src="${this._baseHtml}imgs/${this._veiculoLogo}-ativo.png">
+                <img class="logo-ico-veiculo" src="${this._baseHtml}imgs/${this._veiculoLogo.ativo}">
                 <h2>${this._veiculoNome} (&nbsp<span id="cab-veiculo-contagem-${this._veiculoID}" style="color:inherit; margin: 0 -2px 0 -2px;">0</span>&nbsp)</h2>
                 <ul class="nav navbar-right panel_toolbox">
                     <li><a id="cl-${this._veiculoID}" class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -867,7 +903,7 @@ var CardVeiculo = (function (){
 
                 <div class="resumo-veiculo">
                     <div style="display:inline-block" id="cab-veiculo-periodo-${this._veiculoID}">De 10/10/17 a 10/11/17</div>
-                    <div style="display:inline-block" > &nbsp | &nbsp  Investimento total: <span id="cab-veiculo-investimento-${this._veiculoID}" style="font-weight:600; color:#738cb9">R$ 0,00</span></div>
+                    <div style="display:inline-block" > &nbsp | &nbsp  Investimento total: R$ <span id="cab-veiculo-investimento-${this._veiculoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
                     <div style="display:inline-block; margin-left:5px;">
                         <select class="form-control select-menor" id="select-veic-${this._veiculoID}">${listaPs}</select>
                     </div>
@@ -877,21 +913,21 @@ var CardVeiculo = (function (){
             </div>
             <div class="x_content">
                 <div id="container-produtos-${this._veiculoID}"  class="accordion" role="tablist" aria-multiselectable="true"></div>
+
+                <div class="col-xs-12" style="margin: 6px 0 -6px 0; padding-right:0;">
+                    <button class="btn btn-primary" style="float:right; font-size: 9pt; margin-left:5px;" type="button" onclick="salvarProposta()">Salvar veículo</button>
+                    <button class="btn btn-danger" style="float:right; font-size: 9pt;" type="button" onclick="excluirVeiculo(${this._veiculoID},'${this._veiculoNome}')">Excluir veículo</button>
+                </div>
             </div>
         </div>
         `;
 
-       
-
         this._$escopoGeral.append(containerCard);
 
         // ativa componentes
-        this._$escopoProdutos       = $('#container-produtos-'+this._veiculoID);
-        // this._$elmPeriodo           = $('#cab-veiculo-periodo-'+this._veiculoID);
-        // this._$elmInvestimentoTotal = $('#cab-veiculo-investimento-'+this._veiculoID);
-        // this._$elmTotalProdutos     = $('#cab-veiculo-contagem-'+this._veiculoID);
-        
-
+        this._$escopoProdutos = $('#container-produtos-'+this._veiculoID);
+        this._$painelXCard    = $('#painel-x-card-'+this._veiculoID);
+       
         $('#select-veic-'+this._veiculoID).on('change', function() { 
             if(this.value != "") {
                 self._inserirNovoProduto( this.value );
@@ -907,14 +943,7 @@ var CardVeiculo = (function (){
 
 
     // métodos públicos
-   fn.ativar = function (meses,idProposta){
-        if(!meses) {
-            console.log('ERR. >> Range de meses obrigatórios para ativação do card!');
-            return;
-        }
-        
-        this._listaMeses = meses;
-
+   fn.ativar = function (idProposta){
         if(idProposta){
             // TODO //////////////////////////////////
         } else { 
@@ -923,10 +952,53 @@ var CardVeiculo = (function (){
         }
     }
 
-    fn.atualizaDadosCabecalho = function(elm,info){
-        // elm == 'periodo' | 'investimento' | 'contagem'
-        $('#cab-veiculo-'+elm+'-'+this._veiculoID).empty();
-        $('#cab-veiculo-'+elm+'-'+this._veiculoID).append(info);
+
+    fn.atualizaDadosCabecalho = function(){
+        // this._produtosAtivos
+        var dataInit, dataFim, di, df;
+        this._investimentoTotal = 0;
+        
+        for(var i=0; i<this._produtosAtivos.length; i++){
+            var pr = this._produtosAtivos[i];
+            var datas = pr.getDatas(); 
+            var arDi = datas.dataInit.split('/');
+            var arDf = datas.dataFim.split('/');
+        
+            if(i == 0){
+                dataInit = parseInt(arDi[2]+arDi[1]+arDi[0]);
+                dataFim  = parseInt(arDf[2]+arDf[1]+arDf[0]);
+
+                this._dataInit = datas.dataInit;
+                this._dataFim  = datas.dataFim;
+
+            } else {
+                di = parseInt(arDi[2]+arDi[1]+arDi[0]);
+                df = parseInt(arDf[2]+arDf[1]+arDf[0]);
+
+                if(di < dataInit){
+                    dataInit = di;
+                    this._dataInit = datas.dataInit;
+                }
+    
+                if(df > dataFim){
+                    dataFim = df;
+                    this._dataFim  = datas.dataFim;
+                }
+            }
+
+            this._investimentoTotal  += parseFloat(isNaN(pr.getInvestimento())?0:pr.getInvestimento()); 
+        }
+        
+        this._investimentoTotal = this._investimentoTotal.toFixed(2);
+        //////////////
+        $('#cab-veiculo-contagem-'+this._veiculoID).empty();
+        $('#cab-veiculo-contagem-'+this._veiculoID).append(this._produtosAtivos.length);
+
+        $('#cab-veiculo-periodo-'+this._veiculoID).empty();
+        $('#cab-veiculo-periodo-'+this._veiculoID).append('De '+this._dataInit+' a '+this._dataFim);
+
+        $('#cab-veiculo-investimento-'+this._veiculoID).empty(); //console.log('invest depois total '+this._investimentoTotal)
+        $('#cab-veiculo-investimento-'+this._veiculoID).append(formataDado(this._investimentoTotal));
     }
     
     
@@ -935,7 +1007,8 @@ var CardVeiculo = (function (){
     }
 
     fn.excluir = function(){
-        // TODO //////////////////////////////////
+        this._$painelXCard.remove(); 
+        this._btVeiculo.desativar();
     }
 
     fn.getID    = function (){ return this._veiculoID; }
@@ -949,4 +1022,7 @@ var CardVeiculo = (function (){
     // expoe construtor
     return CardVeiculo;
 })();
+
+
+
 

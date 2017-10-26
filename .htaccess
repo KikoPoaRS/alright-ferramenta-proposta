@@ -1,0 +1,11 @@
+RewriteEngine On
+
+# SUBSTITUIR O CAMINHO /~antoniosantos/producao/bitfans/ PELO CAMINHO FINAL
+# SE O PROJETO ESTIVER NA RAIZ USAR SOMENTE RewriteBase /
+# DO CONTRÁRIO USAR RewriteBase /pasta1/pastaN
+RewriteBase /~antoniosantos/producao/clientes/alright/ferramenta_proposta/
+
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /~antoniosantos/producao/clientes/alright/ferramenta_proposta/index.php [L]

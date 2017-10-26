@@ -1,6 +1,6 @@
 <?php 
 
-date_default_timezone_set('America/Sao_Paulo');
+// date_default_timezone_set('America/Sao_Paulo');
 	
 // este arquivo é inserido no index.php (require) que está no diretório raiz.
 // Por este motivo os caminhos definidos neste arquivo devem estar

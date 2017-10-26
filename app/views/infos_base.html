@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block scriptscss %}
+    <!-- NProgress -->
+    <link href="{{ __BASEHTML__ }}vendors/nprogress/nprogress.css" rel="stylesheet">
+    
+    <!-- Ion.RangeSlider -->
+    <link href="{{ __BASEHTML__ }}vendors/normalize-css/normalize.css" rel="stylesheet">
+    <link href="{{ __BASEHTML__ }}vendors/ion.rangeSlider/css/ion.rangeSlider.css" rel="stylesheet">
+    <link href="{{ __BASEHTML__ }}vendors/ion.rangeSlider/css/ion.rangeSlider.skinFlat.css" rel="stylesheet">
+{% endblock %}
+
+{% block conteudo %}
+
+
+<div class="page-title">
+    <div class="title_left">
+    <h4>Dados de referência <i class="fa fa-arrow-right setatitulo"></i> Informações de base</h4>
+    </div>
+</div>
+
+<div class="clearfix"></div>
+
+<div class="row">
+    <div class="col-md-12" style="width:100%">
+        <!-- +++++++++++++++++ DADOS GERAOS +++++++++++++++++ -->
+        <!-- TIPO DE COMPRA -->
+        <div class="x_panel">
+            <div class="Grid x_title">
+                <h2>Tipos de compras </h2>
+                <div class="Grid-cell" style="padding:6px 12px; color:#56565a; font-size: 8.5pt;">Defina o nome do tipo de compra e o fator de multiplicação</div>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="Grid container-cria-registro">
+                    <div class="elm-cria-registro texto">Nome</div>
+                    <div class="elm-cria-registro" style="width:200px;"><input type="text" id="tipocompra-nome" class="form-control"></div>
+                    <div class="elm-cria-registro texto" style="margin-left:15px;">Multiplicador</div>
+                    <div class="Grid elm-cria-registro">
+                        <div class="radio-cria-registro"><input type="radio" value="1" name="radio-multiplicador-tipocompra" checked></div><span class="radio-cria-registro label-radio">1</span> 
+                        <div class="radio-cria-registro"><input type="radio" value="1000" name="radio-multiplicador-tipocompra"></div><span class="radio-cria-registro label-radio">1000</span> 
+                    </div>
+                    <div class="Grid-cell">
+                        <div onclick="operacoesCompra()" class="btn btn-primary" style="float:right;">Salvar compra</div>
+                    </div>
+                </div>
+
+                <table class="table table-striped" style="margin-top:15px; width:370px;">
+                    <thead>
+                        <tr>
+                        <th style="width:200px;">Nome</th>
+                        <th>Multiplicador</th>
+                        <th style="width: 60px; text-align:center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-COMPRAS">
+                        {% if listaTiposCompras|length > 0 %}
+                            {% for compra in listaTiposCompras %}
+                            <tr id="COMPRA-{{compra.id}}">
+                                <td><input type="text" id="tipocompra-nome-{{compra.id}}" class="form-control" value="{{compra.nome}}"></td>
+                                <td>
+                                    <div class="Grid">
+                                        <div class="radio-tabela"><input type="radio" value="1" name="radio-multiplicador-tipocompra-{{compra.id}}" {% if compra.multiplicador == 1 %} checked {% endif %}></div><span class="radio-tabela label-radio">1</span> 
+                                        <div class="radio-tabela"><input type="radio" value="1000" name="radio-multiplicador-tipocompra-{{compra.id}}" {% if compra.multiplicador == 1000 %} checked {% endif %}></div><span class="radio-tabela label-radio">1000</span> 
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="padding: 4px 0; text-align:center;">
+                                        <button onclick="operacoesCompra({{compra.id}},1)" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Salvar registro"><i class="fa fa-save"></i></button>
+                                        <button onclick="operacoesCompra({{compra.id}},0)" type="button" class="btn btn-round btn-danger bt-acoes" data-toggle="tooltip" data-placement="top" title="Excluir registro"> <span style="position:relative; top:-7px;">x</span> </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="sem-COMPRAS"> <td colspan="3" style="text-align:center;">Não há tipos de compras cadastradas!</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CLIENTES -->
+        <div class="x_panel collapsed"  style="margin-top:20px;">
+            <div class="Grid x_title">
+                <h2>Clientes </h2>
+                <div class="Grid-cell" style="padding:6px 12px; color:#56565a; font-size: 8.5pt;">Insira o nome do cliente e o código de referência da plataforma externa</div>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="Grid container-cria-registro">
+                    <div class="elm-cria-registro texto">Cliente</div>
+                    <div class="elm-cria-registro" style="width:150px;"><input type="text" id="CLIENTE-nome" class="form-control"></div>
+                    <div class="elm-cria-registro texto" style="margin-left:15px;">Código Externo</div>
+                    <div class="elm-cria-registro" style="width:90px;"><input type="text" id="CLIENTE-codexterno" class="form-control"></div>
+                    <div class="Grid-cell">
+                        <div onclick="operacoesAgenciaCliente('CLIENTE')" class="btn btn-primary" style="float:right;">Salvar cliente</div>
+                    </div>
+                </div>
+
+                <table class="table table-striped" style="margin-top:15px; width:350px;">
+                    <thead>
+                        <tr>
+                        <th style="width:150px;">Cliente</th>
+                        <th>Código Externo</th>
+                        <th style="width: 60px; text-align:center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-CLIENTES">
+                        {% if listaClientes|length > 0 %}
+                            {% for cliente in listaClientes %}
+                            <tr id="CLIENTE-{{cliente.id}}">
+                                <td><input type="text" id="CLIENTE-nome-{{cliente.id}}" class="form-control" value="{{cliente.nome}}"></td>
+                                <td><input type="text" id="CLIENTE-codexterno-{{cliente.id}}" class="form-control" value="{{cliente.codigo_externo}}"></td>
+                                <td>
+                                    <div style="padding: 4px 0; text-align:center;">
+                                        <button onclick="operacoesAgenciaCliente('CLIENTE',{{cliente.id}},1)" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Atualizar registro"><i class="fa fa-save"></i></button>
+                                        <button onclick="operacoesAgenciaCliente('CLIENTE',{{cliente.id}},0)" type="button" class="btn btn-round btn-danger bt-acoes" data-toggle="tooltip" data-placement="top" title="Excluir registro"> <span style="position:relative; top:-7px;">x</span> </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="sem-CLIENTES"> <td colspan="3" style="text-align:center;">Não há clientes cadastrados!</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- AGÊNCIAS  -->
+        <div class="x_panel collapsed"  style="margin-top:20px;">
+            <div class="Grid x_title">
+                <h2>Agências </h2>
+                <div class="Grid-cell" style="padding:6px 12px; color:#56565a; font-size: 8.5pt;">Insira o nome da agência e o código de referência da plataforma externa</div>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <div class="Grid container-cria-registro">
+                    <div class="elm-cria-registro texto">Agência</div>
+                    <div class="elm-cria-registro" style="width:150px;"><input type="text" id="AGENCIA-nome" class="form-control"></div>
+                    <div class="elm-cria-registro texto" style="margin-left:15px;">Código Externo</div>
+                    <div class="elm-cria-registro" style="width:90px;"><input type="text" id="AGENCIA-codexterno" class="form-control"></div>
+                    <div class="Grid-cell">
+                        <div onclick="operacoesAgenciaCliente('AGENCIA')" class="btn btn-primary" style="float:right;">Salvar agência</div>
+                    </div>
+                </div>
+
+                <table class="table table-striped" style="margin-top:15px; width:350px;">
+                    <thead>
+                        <tr>
+                        <th style="width:150px;">Agência</th>
+                        <th>Código Externo</th>
+                        <th style="width: 60px; text-align:center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-AGENCIAS">
+                        {% if listaAgencias|length > 0 %}
+                            {% for agencia in listaAgencias %}
+                            <tr id="AGENCIA-{{agencia.id}}">
+                                <td><input type="text" id="agencia-nome-{{agencia.id}}" class="form-control" value="{{agencia.nome}}"></td>
+                                <td><input type="text" id="agencia-codexterno-{{agencia.id}}" class="form-control" value="{{agencia.codigo_externo}}"></td>
+                                <td>
+                                    <div style="padding: 4px 0; text-align:center;">
+                                        <button onclick="operacoesAgenciaCliente('AGENCIA',{{agencia.id}},1)" type="button" class="btn btn-round btn-info bt-acoes"  data-toggle="tooltip" data-placement="top" title="Salvar registro"><i class="fa fa-save"></i></button>
+                                        <button onclick="operacoesAgenciaCliente('AGENCIA',{{agencia.id}},0)" type="button" class="btn btn-round btn-danger bt-acoes"  data-toggle="tooltip" data-placement="top" title="Excluir registro"> <span style="position:relative; top:-7px;">x</span> </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="sem-AGENCIAS"> <td colspan="3" style="text-align:center;">Não há agências cadastradas!</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- ++++++++++++ ATRIBUIÇOES DE VEÍCULOS ++++++++++++ -->
+       
+
+        {% for tabela in listaTabelasVeiculos %}  
+        <!-- TIPOS DE {{tabela.itemId}} POR VEÍCULO -->
+
+        <div class="x_panel {% if loop.index > 1 %} collapsed {% endif %}" style="margin-top:20px;">
+            <div class="Grid x_title">
+                <h2>Tipos de {{tabela.tipo}} por veículo </h2>
+                <div class="Grid-cell" style="padding:6px 12px; color:#56565a; font-size: 8.5pt;">Insira os tipos de {{tabela.tipo}} por veículo, separados por virgulas.</div>
+                <ul class="nav navbar-right panel_toolbox">
+                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    </li>
+                </ul>
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="x_content">
+                <table class="table table-striped" style="margin-top:-10px;">
+                    <thead>
+                        <tr>
+                        <th style="width:140px;">Veículo</th>
+                        <th>{{tabela.tipo|capitalize}}</th>
+                        <th style="width: 60px; text-align:center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for veiculo in listaVeiculos %}
+                        <tr>
+                            <td>
+                                <div class="Grid">
+                                    <img class="logo-ico-tabela" src="{{ __BASEHTML__ }}imgs/{{veiculo.imagem}}">
+                                    <span style="font-weight: 600;">{{veiculo.nome}}</span>
+                                </div>
+                            </td>
+                            <td><input type="text" id="{{tabela.itemId}}-veiculo-{{ veiculo.id }}" class="form-control" value="{% if tabela.itemId == 'PRODUTO' %}{{veiculo.produtos}}{% elseif tabela.tipo == 'SEGMENTO' %}{{veiculo.segmentacoes}}{% else  %}{{veiculo.formatos}}{% endif %}"></td>
+                            <td>
+                                <div style="padding: 4px 0; text-align:center;">
+                                    <button onclick="salvarDadosVeiculo('{% if tabela.itemId == 'PRODUTO' %}produtos{% elseif tabela.tipo == 'SEGMENTO' %}segmentacoes{% else  %}formatos{% endif %}',{{ veiculo.id }},'{{veiculo.nome}}', '{{tabela.itemId}}')" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Atualizar registro"><i class="fa fa-save"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% include "modal-menor.html" %}
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scriptsjs %}
+    <script src="{{ __BASEHTML__ }}vendors/ion.rangeSlider/js/ion.rangeSlider.min.js"></script>
+    <script src="{{ __BASEHTML__ }}vendors/jquery-mask/jquery.mask.min.js"></script>
+
+    <script src="{{ __BASEHTML__ }}js/secoes/infos_base.js?{{random()}}"></script>
+{% endblock %}

@@ -1,0 +1,87 @@
+
+
+{% set __BASEHTML__ = baseUrl() ~ "/app/views/" %}
+{% set __BASESITE__ = baseUrl() %} 
+
+
+
+<!doctype html>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Alright - Ferramenta de propostas</title>
+
+    <!-- Bootstrap -->
+    <link href="{{__BASEHTML__}}vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{__BASEHTML__}}vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    
+    {% block scriptscss %}{% endblock %}
+    
+    <!-- Custom Theme Style -->
+    <link href="{{__BASEHTML__}}css/grid.css" rel="stylesheet">
+    <link href="{{__BASEHTML__}}css/main.css?{{random()}}" rel="stylesheet">
+    <link href="{{__BASEHTML__}}css/custom.css?{{random()}}" rel="stylesheet">
+
+    <script type="text/javascript">var __BASEHTML__ = '{{__BASEHTML__}}'; </script>
+    <script type="text/javascript">var __BASEHTML__ = '{{__BASEHTML__}}'; </script>
+    <script type="text/javascript">var __BASESITE__ = '{{__BASESITE__}}'; </script>
+  </head>
+
+  <body class="login">
+    <div>
+        <a class="hiddenanchor" id="signup"></a>
+        <a class="hiddenanchor" id="signin"></a>
+
+        <div class="login_wrapper">
+            <div class="animate form login_form">
+                <section class="login_content">
+                    <form name="flogin" action="?" method="POST">
+                        <h1><img style="margin:-30px auto -15px auto; padding-top:5px;" src="{{__BASEHTML__}}imgs/logo-alright.png" alt=""></h1>
+                        <!-- <div>
+                            <input type="text" class="form-control" placeholder="Usuário" required="" />
+                        </div> -->
+                        <div>
+                            <input type="password" class="form-control" placeholder="Senha" name="toolpass" required="" />
+                        </div>
+                        {% if ERRO_LOGIN %}
+                        <div class="login-erro-msg ">
+                            <strong>Senha incorreta</strong> - insira uma senha válida para acessar a ferramenta.
+                        </div>
+                        {% endif %}
+                        <div>
+                            <!-- <a class="btn btn-default submit" style="padding: 6px 40px;" href="{{ urlFor ('lista-propostas')}}">Entrar</a> -->
+                            <a class="btn btn-default submit" style="padding: 6px 40px;" onclick='document.forms["flogin"].submit(); return false;'>Entrar</a>
+                            <!-- <a class="reset_pass" href="#">Esqueceu sua senha?</a> -->
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <div class="separator">
+                        <p class="change_link" style="color:#334055">Ferramenta para geração de propostas.</p>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+   
+
+    <!-- jQuery -->
+    <script src="{{__BASEHTML__}}vendors/jquery/dist/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="{{__BASEHTML__}}vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    
+    <!-- Custom Theme Scripts -->
+    <script src="{{__BASEHTML__}}js/main.js?{{random()}}"></script>
+  </body>
+</html>
+
+
+ 
