@@ -1,11 +1,7 @@
 <?php 
-include_once __DIR__."/../../vendor/php-activerecord/php-activerecord/ActiveRecord.php";
-require "../../connection.php";
-$cfg->set_model_directory(__DIR__.'/../../app/models');
+include_once "connections.php";
 
-$saida       = array();
-$hoje        = new ActiveRecord\DateTime(date('Y-m-d H:i:s'));
-
+$saida    = array();
 $ATUALIZA = 1;
 $EXCLUI   = 0;
 

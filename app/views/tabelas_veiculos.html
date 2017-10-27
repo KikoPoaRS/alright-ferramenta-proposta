@@ -16,7 +16,7 @@
 
 <div class="page-title">
     <div class="title_left">
-    <h4>Dados de referência <i class="fa fa-arrow-right setatitulo"></i> Tabela de veículos</h4>
+    <h4>Dados de referência <i class="fa fa-arrow-right setatitulo"></i> Tabelas de regras de veículos</h4>
     </div>
 </div>
 
@@ -35,10 +35,10 @@
                     </ul>
     
                     <div class="resumo-veiculo">
-                        <div style="display:inline-block" > <span id="cab-veiculo-modelos-{{ veiculo.id }}" style="color:inherit; font-weight:600;">{{veiculo.listaRegras|length}}</span> modelo{% if veiculo.listaRegras|length > 1 %}s{% endif %}</div>
+                        <div style="display:inline-block" > <span id="cab-veiculo-modelos-{{ veiculo.id }}" style="color:inherit; font-weight:600;">{{veiculo.listaRegras|length}}</span> regra{% if veiculo.listaRegras|length > 1 %}s{% endif %}</div>
                         
                         <div style="display:inline-block; margin-left:5px;">
-                            <button class="btn btn-default" style="color: #9c9b9b; margin-bottom:6px;" type="button" onclick="inserirNovaRegra({{ veiculo.id }})">Incluir novo modelo</button>
+                            <button class="btn btn-default" style="color: #9c9b9b; margin-bottom:6px;" type="button" onclick="inserirAtualizarRegra({{ veiculo.id }})">Incluir nova regra</button>
                         </div>
                     </div>
 
@@ -86,7 +86,7 @@
                                                 {{REGRA.compra|raw}}
                                         </select>
                                     </td>
-                                    <td><input type="text" id="veiculo-cub-{{ REGRA.id }}" class="form-control mask-moeda" style="height:28px; width:60px;  text-align:center; padding:6px;" value="{{REGRA.cub}}"></td>
+                                    <td><input type="text" id="veic-cub-{{ REGRA.id }}" class="form-control mask-moeda" style="height:28px; width:60px;  text-align:center; padding:6px;" value="{{REGRA.cub}}"></td>
                                     <td><input type="text" id="veic-descmax-{{ REGRA.id }}" class="form-control mask-pct" style="width:60px; height:28px; text-align:center; padding:6px;" value="{{REGRA.desconto_max}}"></td>
                                     <td style="padding-top: 5px;">
                                         <div style="padding: 4px 0; text-align:center;">
