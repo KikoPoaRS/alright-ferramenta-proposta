@@ -130,28 +130,3 @@ function montaListaRegras($regras,$produtos,$segmentacoes,$formatos, $compras){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-// $listaVeiculos = [
-	// 	['nome'=>'SmartClip',   'thumb'=>'bt-produto-smartclip-ativo.png',   'cor'=>'#bf534c'],
-	// 	['nome'=>'Outbrain',    'thumb'=>'bt-produto-outbrain-ativo.png',    'cor'=>'#dc8439'],
-	// 	['nome'=>'YouTube',     'thumb'=>'bt-produto-youtube-ativo.png',     'cor'=>'#e57c76'],
-	// 	['nome'=>'TradeLab',    'thumb'=>'bt-produto-tradelab-ativo.png',    'cor'=>'#b1c43f'],
-	// 	['nome'=>'Facebook',    'thumb'=>'bt-produto-facebook-ativo.png',    'cor'=>'#425893'],
-	// 	['nome'=>'Alright',     'thumb'=>'bt-produto-alright-ativo.png',     'cor'=>'#6c00e9'],
-	// 	['nome'=>'Google',      'thumb'=>'bt-produto-google-ativo.png',      'cor'=>'#547cf2'],
-	// 	['nome'=>'Waze',        'thumb'=>'bt-produto-waze-ativo.png',        'cor'=>'#a5c2ce'],
-	// 	['nome'=>'SuperPlayer', 'thumb'=>'bt-produto-superplayer-ativo.png', 'cor'=>'#000000'],
-	// 	['nome'=>'Audioad',     'thumb'=>'bt-produto-audioad-ativo.png',     'cor'=>'#cf7442'],
-	// 	['nome'=>'ModaIt',      'thumb'=>'bt-produto-modait-ativo.png',      'cor'=>'#ca547b'],
-	// 	['nome'=>'Buscapé',     'thumb'=>'bt-produto-buscape-ativo.png',     'cor'=>'#eecc4d']
-	// ];

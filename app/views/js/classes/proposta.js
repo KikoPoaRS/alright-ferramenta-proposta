@@ -1,15 +1,19 @@
 
+
+function infosErros(tipoErro,refs = []){
+    switch (tipoErro) {
+        case 'target_praca': return 'Defina o target e a praça corretamente para o produto <strong>'+refs[0]+'</strong> do veículo <strong>'+refs[1]+'</strong>'; break;
+        case 'total_bruto': return 'Defina um total bruto para o produto <strong>'+refs[0]+'</strong> do veículo <strong>'+refs[1]+'</strong>'; break;
+    }
+}
+
 //////////////////////////////////////////////////////////////
 // FUNÇÕES DE SUPORTE ////////////////////////////////////////
 
 function excluirVeiculo(idv,nome){
-    callModalMenor('Confirma excluir veículo '+nome+'!', 
-    'Todos os produtos e períodos do veículo selecionado serão excluidos da tela de edição e da base de dados.',
+    callModalMenor('CONFIRMA EXCLUIR VEÍCULO <strong>'+nome+'</strong>?', 
+    'Todos os produtos e períodos do veículo selecionado serão excluidos imediatamente da tela de edição e da base de dados.',
     function(){document.dispatchEvent(new CustomEvent("eventoExcluiCard",{ "detail": {'veiculoID':idv} }));});
-}
-
-function salvarProposta(){
-    // TODO ///////////////////
 }
 
 
@@ -29,18 +33,18 @@ var BtVeiculo = (function(){
         this._status   = status;
         this._baseHtml = baseHTML;
         
-        $(escopo).append('<div id="btGeral-produto-'+id+'"></div>');
+        $(escopo).append('<div id="btGeral-produto_'+id+'"></div>');
         
-        this._$escopo  = $('#btGeral-produto-'+id);
+        this._$escopo  = $('#btGeral-produto_'+id);
 
-        this._btATIVO   = `
+        this._btATIVO  = `
         <a class="btn btn-app ativo" style="border-bottom: 3px solid ${cor};">
             <img src="${baseHTML}imgs/${logo.ativo}">
         </a>
         `;
         
         this._btINATIVO = `
-        <a id="btp-${id}" class="btn btn-app">
+        <a id="btp_${id}" class="btn btn-app">
             <img src="${baseHTML}imgs/${logo.inativo}">
         </a>
         `;
@@ -66,10 +70,15 @@ var BtVeiculo = (function(){
         this._$escopo.empty();
         this._$escopo.append(this._btINATIVO);
 
-        $('#btp-'+this._id).click(function() {
-            if(!self._status){
-                document.dispatchEvent(new CustomEvent("eventoCriaCard",{ "detail": {'veiculoID':self._id} }));
-                self.ativar();
+        $('#btp_'+this._id).click(function() {
+
+            if(IDProposta == 0){
+                chamaModalFeedback('NÃO FOI POSSÍVEL INCLUIR VEÍCULO!','Para incluir um novo veículo é necessário antes salvar os DADOS GERAIS da proposta!');
+            } else {
+                if(!self._status){
+                    document.dispatchEvent(new CustomEvent("eventoCriaCard",{ "detail": {'veiculoID':self._id} }));
+                    self.ativar();
+                }
             }
         })
     }
@@ -90,12 +99,16 @@ var BtVeiculo = (function(){
 
 var PeriodoProduto = (function(){
     // construtor
-    function PeriodoProduto(id, idp, regras, container){
-        // objeto com as regras recebidas - nome | descontoMax | investMinimo | tipoCompra | CUB | CUL                     
+    function PeriodoProduto(vid, linha, grupo, idproduto, regras, container, idTabela = 0){
+        // objeto com as regras recebidas - id | nome | descontoMax | investMinimo | tipoCompra | CUB | CUL                     
+        this._veiculoID         = vid;
         this._regrasPeriodo     = regras;
         this._regrasPeriodo.CUB = parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
-        this._produtoID         = idp;
-        this._periodoID         = idp+'_'+id;
+        this._produtoID         = idproduto;
+        this._grupo             = grupo;
+        this._linha             = linha;
+        this._periodoID         = idproduto+'_'+linha; // id do elemento html
+        this._periodoIDtabela   = idTabela; // id do registro na tabela
         this._$container        = $('#'+container);
 
         this._listaMeses        = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -157,45 +170,45 @@ var PeriodoProduto = (function(){
 
     fn._renderPeriodo = function(){
         var elemPeriodo = `
-        <tr id="periodo-${this._periodoID}">
+        <tr id="periodo_${this._periodoID}">
             <td style="padding-left:0; padding-right:0">
-                <select id="per-select-mes-${this._periodoID}" class="form-control select-menor" style="width:43px; height:25px; padding-right:0">${this._selectMeses}</select>
+                <select id="per-select-mes_${this._periodoID}" class="form-control select-menor" style="width:43px; height:25px; padding-right:0">${this._selectMeses}</select>
             </td>
             <td style="padding-left:0">
-                <select id="per-select-ano-${this._periodoID}" class="form-control select-menor" style="width:36px; height:25px;">${this._selectAnos}</select>
+                <select id="per-select-ano_${this._periodoID}" class="form-control select-menor" style="width:36px; height:25px;">${this._selectAnos}</select>
             </td>
             <td style="padding-bottom:0; min-width:120px;">
-                <input type="text" id="per-slider-${this._periodoID}" name="per-slider-${this._periodoID}" value="" />
+                <input type="text" id="per-slider_${this._periodoID}" name="per-slider_${this._periodoID}" value="" />
             </td>
-            <td style="width:100px;"><input id="per-totbruto-${this._periodoID}" style="padding:5px; text-align:right;" type="text" class="form-control" value=""></td>
-            <td style="text-align:center;"><span id="per-volcontratado-${this._periodoID}"></span></td>
-            <td><span id="per-tipocompra-${this._periodoID}"></span></td>
-            <td style="min-width:50px;">R$ <span id="per-CUB-${this._periodoID}"></span></td>
-            <td style="min-width:50px;">R$ <span id="per-CUL-${this._periodoID}"></span></td>
-            <td style="max-width:65px;"><input id="per-desconto-${this._periodoID}" type="text" class="form-control" value="" style="width:55px;"></td>
-            <td style="min-width:50px;">R$ <span id="per-CUBN-${this._periodoID}"></span></td>
-            <td style="min-width:50px;">R$ <span id="per-CULN-${this._periodoID}"></span></td>
-            <td style="min-width: 85px;"><div style="color:black; font-weight:600">R$ <span id="per-totliquido-${this._periodoID}"></span></div></td>
-            <td class="bt-fechar-tabela"><div  id="per-btexcluir-${this._periodoID}" class="bt-fechar tabela">X</div></td>
+            <td style="width:100px;"><input id="per-totbruto_${this._periodoID}" style="padding:5px; text-align:right;" type="text" class="form-control" value=""></td>
+            <td style="text-align:center;"><span id="per-volcontratado_${this._periodoID}"></span></td>
+            <td><span id="per-tipocompra_${this._periodoID}"></span></td>
+            <td style="min-width:50px;">R$ <span id="per-CUB_${this._periodoID}"></span></td>
+            <td style="min-width:50px;">R$ <span id="per-CUL_${this._periodoID}"></span></td>
+            <td style="max-width:65px;"><input id="per-desconto_${this._periodoID}" type="text" class="form-control" value="" style="width:55px;"></td>
+            <td style="min-width:50px;">R$ <span id="per-CUBN_${this._periodoID}"></span></td>
+            <td style="min-width:50px;">R$ <span id="per-CULN_${this._periodoID}"></span></td>
+            <td style="min-width: 85px;"><div style="color:black; font-weight:600">R$ <span id="per-totliquido_${this._periodoID}"></span></div></td>
+            <td class="bt-fechar-tabela"><div  id="per-btexcluir_${this._periodoID}" class="bt-fechar tabela">X</div></td>
         </tr>
         `;
 
         this._$container.append(elemPeriodo);
 
         // atribui referencias dos elentos html
-        this._$elmLPERIODO      = $('#periodo-'+this._periodoID);
-        this._$elmSelectMeses   = $('#per-select-mes-'+this._periodoID);
-        this._$elmSelectAnos    = $('#per-select-ano-'+this._periodoID);
-        this._$elmSliderDias    = $('#per-slider-'+this._periodoID);
-        this._$elmTotBruto      = $('#per-totbruto-'+this._periodoID);
-        this._$elmVolContratado = $('#per-volcontratado-'+this._periodoID);
-        this._$elmTipoCompra    = $('#per-tipocompra-'+this._periodoID);
-        this._$elmCUB           = $('#per-CUB-'+this._periodoID);
-        this._$elmCUL           = $('#per-CUL-'+this._periodoID);
-        this._$elmCUB_N         = $('#per-CUBN-'+this._periodoID);
-        this._$elmCUL_N         = $('#per-CULN-'+this._periodoID);
-        this._$elmDesconto      = $('#per-desconto-'+this._periodoID);
-        this._$elmTotLiquido    = $('#per-totliquido-'+this._periodoID);
+        this._$elmLPERIODO      = $('#periodo_'+this._periodoID);
+        this._$elmSelectMeses   = $('#per-select-mes_'+this._periodoID);
+        this._$elmSelectAnos    = $('#per-select-ano_'+this._periodoID);
+        this._$elmSliderDias    = $('#per-slider_'+this._periodoID);
+        this._$elmTotBruto      = $('#per-totbruto_'+this._periodoID);
+        this._$elmVolContratado = $('#per-volcontratado_'+this._periodoID);
+        this._$elmTipoCompra    = $('#per-tipocompra_'+this._periodoID);
+        this._$elmCUB           = $('#per-CUB_'+this._periodoID);
+        this._$elmCUL           = $('#per-CUL_'+this._periodoID);
+        this._$elmCUB_N         = $('#per-CUBN_'+this._periodoID);
+        this._$elmCUL_N         = $('#per-CULN_'+this._periodoID);
+        this._$elmDesconto      = $('#per-desconto_'+this._periodoID);
+        this._$elmTotLiquido    = $('#per-totliquido_'+this._periodoID);
 
         this._$elmTotBruto.mask('000.000.000,00', {reverse: true});
         this._$elmDesconto.mask('00,00', {reverse: true});
@@ -240,7 +253,7 @@ var PeriodoProduto = (function(){
 
         // ativa bt excluir
        
-        $('#per-btexcluir-'+this._periodoID).click(function() {
+        $('#per-btexcluir_'+this._periodoID).click(function() {
             document.dispatchEvent(new CustomEvent("eventoExcluiPeriodo",{ "detail": {'periodoID':self._periodoID} }));
         })
 
@@ -293,10 +306,7 @@ var PeriodoProduto = (function(){
             this._regrasPeriodo.CUB =  parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
         }
 
-
-
         var descontoCliente = $inputDescClientes.val() == 0 || $inputDescClientes.val() == '' ? 20 : parseFloat(formataDado($inputDescClientes.val(),'R$',true));
-
         // executa os cálculas                  
         // this._regrasPeriodo.nome | .descontoMax | .investMinimo | .tipoCompra | .CUB | .CUL
         this._totalCustoBruto   = this._$elmTotBruto.val() == '' ? 0 : parseFloat(formataDado(this._$elmTotBruto.val(),'R$',true));
@@ -334,23 +344,43 @@ var PeriodoProduto = (function(){
         this._$elmTotLiquido.append(formataDado(this._totalCustoLiquido));
     }
 
-    fn.salvar = function(){
-        // TODO //////////////////////////////////
-    }
+    // fn.salvar = function(vid,target,praca){
+    // }
+
+    // fn._onDadosSalvos = function(data){
+    // }
 
     fn.excluir = function(){ 
         this._$elmLPERIODO.remove();
     }
 
+    fn.getDados = function (target,praca){
+        // TODO //////////////////////////////////
+        var dadosPeriodo = {};
+        var datas = this.getDatas(true);
+
+        dadosPeriodo.idPeriodo    = this._periodoIDtabela;
+        dadosPeriodo.idProposta   = IDProposta;
+        dadosPeriodo.idVeiculo    = this._veiculoID;
+        dadosPeriodo.idRegras     = this._regrasPeriodo.id;
+        dadosPeriodo.grupo        = this._grupo;
+        dadosPeriodo.linha        = this._linha;
+        dadosPeriodo.target       = target;
+        dadosPeriodo.praca        = praca;
+        dadosPeriodo.dataInit     = datas.fullInit; 
+        dadosPeriodo.dataFim      = datas.fullFim; 
+        dadosPeriodo.totalBruto   = this._totalCustoBruto;
+        dadosPeriodo.totalLiquido = this._totalCustoLiquido;
+        dadosPeriodo.desconto     = parseFloat(this._desconto);
+
+        if(dadosPeriodo.totalBruto == '' || dadosPeriodo.totalBruto == 0) return false;
+
+        return dadosPeriodo;
+    }
+
     fn.getID = function (){ return this._periodoID; }
 
-    fn.getDatas = function (){
-        
-        // this._mesAtivo          = this._listaMeses[parseInt((new Date).getMonth())];
-        // this._anoAtivo          = String((new Date).getFullYear()).substring(2,4);
-        // this._diaInit           = (new Date).getDay();                  
-        // this._diaFim            = 15;   // valor default
-
+    fn.getDatas = function (salvar = false){
         var p = {};
         var di = this._diaInit < 10 ? '0'+this._diaInit : this._diaInit;
         var df = this._diaFim < 10 ? '0'+this._diaFim : this._diaFim;
@@ -359,9 +389,15 @@ var PeriodoProduto = (function(){
         p.diaFim   = df;
         p.mes      = this._mesAtivo;
         p.ano      = this._anoAtivo;
-        p.fullInit = di+'/'+this._mesAtivo+'/'+this._anoAtivo;
-        p.fullFim  = df+'/'+this._mesAtivo+'/'+this._anoAtivo;
-        
+
+        if(salvar){
+            p.fullInit = this._anoAtivo+'/'+this._mesAtivo+'/'+di;
+            p.fullFim  = this._anoAtivo+'/'+this._mesAtivo+'/'+df;
+        } else {
+            p.fullInit = di+'/'+this._mesAtivo+'/'+this._anoAtivo;
+            p.fullFim  = df+'/'+this._mesAtivo+'/'+this._anoAtivo;
+        }
+
         return p;
     }
 
@@ -369,9 +405,8 @@ var PeriodoProduto = (function(){
 
     fn.getDesconto = function(){ return this._desconto; }
     
-    fn.getDados = function (){
-        // TODO //////////////////////////////////
-    }
+    fn.getIDtabela = function(){ return this._periodoIDtabela; }
+    
 
     // expoe construtor
     return PeriodoProduto;
@@ -388,9 +423,11 @@ var PeriodoProduto = (function(){
 var ProdutoVeiculo = (function(){
 
     // construtor
-    function ProdutoVeiculo(idv, idp, nome, segmentacoes, escopo){
+    function ProdutoVeiculo(idv, nomev, idp, nome, segmentacoes, escopo){
         this._veiculoID          = idv;
-        this._produtoID          = idv+'-'+idp;
+        this._veiculoNome        = nomev;
+        this._grupo              = idp;
+        this._produtoID          = idv+'_'+idp;
         this._produtoNome        = nome;
         this._$escopoProdutos    = escopo;
         this._listaSegmentacoes  = segmentacoes;
@@ -406,6 +443,7 @@ var ProdutoVeiculo = (function(){
         this._dataInit           = '--';
         this._dataFim            = '--';
         this._investimentoTotal  = 0;
+        this._contaPeriodos      = 0;
 
         // elementos html
         this._$elmSelectFormatos = null;
@@ -413,6 +451,8 @@ var ProdutoVeiculo = (function(){
         this._$elmTabelaPeriodos = null;
         this._$elmCabProdutoPer  = null;
         this._$elmCabProdutoInv  = null;
+        this._$elmTarget         = null;
+        this._$elmPraca          = null;
 
         ///////////////////////////////////////////
         // EVENTOS ////////////////////////////////
@@ -423,9 +463,11 @@ var ProdutoVeiculo = (function(){
             var posPeriodo = -1;
 
             if(self._listaPeriodos.length == 1){
-                callModalMenor('Este período não pode ser excluido!', 'Cada produto selecionado deve ter no mínimo um período definido.'); // chamada à função externa da modal
+                callModalMenor('ESTE PERÍODO NÃO PODE SER EXCLUIDO!', 'Cada produto selecionado deve ter no mínimo um período definido.'); // chamada à função externa da modal
             } else {
-                self._excluiPeriodos(e.detail.periodoID);
+                callModalMenor('CONFIRMA EXCLUIR PERÍODO?', 
+                'Os dados relativos a este período serão excluidos imediatamente da tela de edição e da base de dados.',
+                function(){self._excluiPeriodos(e.detail.periodoID)});
             }
         });
 
@@ -455,9 +497,15 @@ var ProdutoVeiculo = (function(){
                 var p = this._listaPeriodos[i];
 
                 if(!idp || idp == p.getID()){
+                    // REMOVE DO BANCO
+                    if(p.getIDtabela() != 0){
+
+                    }
+
                     p.excluir();
                     this._listaPeriodos[i] = p = null;
                     posPeriodo = i;
+
                 }
             }
 
@@ -541,7 +589,7 @@ var ProdutoVeiculo = (function(){
     }
 
     fn._criarPeriodo = function(){
-        var novoPeriodo = new PeriodoProduto(this._listaPeriodos.length, this._produtoID, this._formatoAtivo, this._$elmTabelaPeriodos.attr('id'));
+        var novoPeriodo = new PeriodoProduto(this._veiculoID, ++this._contaPeriodos, this._grupo, this._produtoID, this._formatoAtivo, this._$elmTabelaPeriodos.attr('id'),0);
         this._listaPeriodos.push(novoPeriodo);
     }
 
@@ -555,44 +603,44 @@ var ProdutoVeiculo = (function(){
         }
         
         var containerProduto = `
-        <div class="panel" id="el-produto-${this._produtoID}">
-            <a class="panel-heading" role="tab" id="headingOne1" data-toggle="collapse" data-parent="#container-produtos-${this._produtoID}" href="#ac-${this._produtoID}" aria-expanded="true" aria-controls="collapseOne">
+        <div class="panel" id="el-produto_${this._produtoID}">
+            <a class="panel-heading" role="tab" id="cab-a-produto_${this._produtoID}" data-toggle="collapse" data-parent="#container-produtos_${this._produtoID}" href="#ac_${this._produtoID}" aria-expanded="true" aria-controls="ac_${this._produtoID}">
                 <h4 class="panel-title" style="display:inline-block">${this._produtoNome}</h4>
             </a>
 
             <div class="resumo-veiculo" style="margin-top:-34px;">
-                <div style="display:inline-block" id="cab-produto-periodo-${this._produtoID}">De --- a ---</div>
-                <div style="display:inline-block">&nbsp | &nbsp  Investimento total: R$ <span id="cab-produto-investimento-${this._produtoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
+                <div style="display:inline-block" id="cab-produto-periodo_${this._produtoID}">De --- a ---</div>
+                <div style="display:inline-block">&nbsp | &nbsp  Investimento total: R$ <span id="cab-produto-investimento_${this._produtoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
 
-                <div style="display:inline-block; margin-left:5px;" id="cab-produto-select-segmentacao-${this._produtoID}">
-                    <select id="select-produto-segmentacao-${this._produtoID}" class="form-control select-menor">${listaSegs}</select>
+                <div style="display:inline-block; margin-left:5px;" id="cab-produto-select-segmentacao_${this._produtoID}">
+                    <select id="select-produto-segmentacao_${this._produtoID}" class="form-control select-menor">${listaSegs}</select>
                 </div>
-                <div id="btexcluir-produto-${this._produtoID}" class="bt-fechar" onclick="">X</div>
+                <div id="btexcluir-produto_${this._produtoID}" class="bt-fechar">X</div>
             </div>
 
-            <div id="ac-${this._produtoID}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div id="ac_${this._produtoID}" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="cab-a-produto_${this._produtoID}">
                 <div class="panel-body" style="padding: 7px 0; height: 52px;">
                     <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding: 0;">
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 35px;">Target</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <input id="target-${this._produtoID}" type="text" placeholder="Digite o target" class="form-control">
+                            <input id="target_${this._produtoID}" type="text" placeholder="Digite o target" class="form-control">
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 33px;">Praça</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <input id="praca-${this._produtoID}" type="text" placeholder="Digite a praça" class="form-control">
+                            <input id="praca_${this._produtoID}" type="text" placeholder="Digite a praça" class="form-control">
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 47px;">Formato</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <select id="formato-pr-${this._produtoID}" class="form-control select-menor"></select>
+                            <select id="formato-pr_${this._produtoID}" class="form-control select-menor"></select>
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 82px;">Desc. máximo</label>
-                        <div id="desconto-${this._produtoID}" class="col-sm-2 colunas-form-produtos form-group" style="font-weight:600; color:black; padding-top:4px; width: 15px; font-size:9pt;"></div>
+                        <div id="desconto_${this._produtoID}" class="col-sm-2 colunas-form-produtos form-group" style="font-weight:600; color:black; padding-top:4px; width: 15px; font-size:9pt;"></div>
 
                         <div class="col-sm-2 colunas-form-produtos form-group" style="padding-right: 0; position: relative; float: right;width: 95px;">
-                            <button type="button" id="btn-insert-periodo-${this._produtoID}" class="btn btn-default" style="font-size: 8pt; color:#9c9b9b; float:right; margin-right:0; padding:4px 12px;">Inserir período</button>
+                            <button type="button" id="btn-insert-periodo_${this._produtoID}" class="btn btn-default" style="font-size: 8pt; color:#9c9b9b; float:right; margin-right:0; padding:4px 12px; height:25px;">Inserir período</button>
                         </div>
 
                     </div>
@@ -617,7 +665,7 @@ var ProdutoVeiculo = (function(){
                             <th class="bt-fechar-tabela"></th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-periodos-${this._produtoID}"></tbody>
+                        <tbody id="tabela-periodos_${this._produtoID}"></tbody>
                     </table>
                 </div>
 
@@ -631,35 +679,37 @@ var ProdutoVeiculo = (function(){
         
         // ativa componentes
         this._$escopoProdutos.append(containerProduto);
-        this._$elementoProduto   = $('#el-produto-'+this._produtoID);
-        this._$elmSelectFormatos = $('#formato-pr-'+this._produtoID);
-        this._$elmDescontoMax    = $('#desconto-'+this._produtoID);
-        this._$elmTabelaPeriodos = $('#tabela-periodos-'+this._produtoID);
-        this._$elmCabProdutoPer  = $('#cab-produto-periodo-'+this._produtoID);
-        this._$elmCabProdutoInv  = $('#cab-produto-investimento-'+this._produtoID);
+        this._$elementoProduto   = $('#el-produto_'+this._produtoID);
+        this._$elmSelectFormatos = $('#formato-pr_'+this._produtoID);
+        this._$elmTarget         = $('#target_'+this._produtoID);
+        this._$elmPraca          = $('#praca_'+this._produtoID);
+        this._$elmDescontoMax    = $('#desconto_'+this._produtoID);
+        this._$elmTabelaPeriodos = $('#tabela-periodos_'+this._produtoID);
+        this._$elmCabProdutoPer  = $('#cab-produto-periodo_'+this._produtoID);
+        this._$elmCabProdutoInv  = $('#cab-produto-investimento_'+this._produtoID);
 
         var self = this; //
 
-        $('#select-produto-segmentacao-'+this._produtoID).on('change', function() { 
+        $('#select-produto-segmentacao_'+this._produtoID).on('change', function() { 
             if(this.value != ""){
                 self._ativarSegmentacao(this.value);
             }
         })
 
-        $('#formato-'+this._produtoID).on('change', function() { 
+        $('#formato_'+this._produtoID).on('change', function() { 
             if(this.value != ""){
                 self._aplicarFormato(this.value);
             }
         })
 
-        $('#btn-insert-periodo-'+this._produtoID).click(function() { 
+        $('#btn-insert-periodo_'+this._produtoID).click(function() { 
             // TODO
             self._criarPeriodo();
         })
 
         // var idp = this._produtoID;
 
-        $('#btexcluir-produto-'+this._produtoID).click(function() { 
+        $('#btexcluir-produto_'+this._produtoID).click(function() { 
             document.dispatchEvent(new CustomEvent("eventoExcluiProduto",{ "detail": {'produtoID':self._produtoID} }));
         })
 
@@ -722,7 +772,7 @@ var ProdutoVeiculo = (function(){
     
 
     fn.toogleAba = function(s){ // s == 'show' | 'hide'
-        var $aba = $('#ac-'+this._produtoID);
+        var $aba = $('#ac_'+this._produtoID);
         if(s == undefined){
             $aba.collapse('toggle');
         } else {
@@ -730,11 +780,31 @@ var ProdutoVeiculo = (function(){
         }
     }
 
-    fn.getID = function(){
-        return this._produtoID;
-    }
+    fn.getID = function(){ return this._produtoID; }
 
-    fn.getDados = function(){ }
+    fn.getDados = function(){ 
+        this._target = this._$elmTarget.val();
+        this._praca = this._$elmPraca.val();
+
+        if(this._target == '' || this._praca == '') return {erro:infosErros('target_praca',[this._produtoNome,this._veiculoNome])};
+        
+        var DADOS = [];
+        
+        if(this._listaPeriodos.length > 0){
+            for(var i=0; i<this._listaPeriodos.length; i++){
+                var p = this._listaPeriodos[i];
+                var dados = p.getDados(this._target,this._praca);
+
+                if(dados){
+                    DADOS.push(dados);
+                } else {
+                    return {erro:infosErros('total_bruto',[this._produtoNome,this._veiculoNome])};
+                }
+            }
+        }
+
+        return DADOS;
+    }
 
     fn.getDatas = function(){
         return {dataInit:this._dataInit, dataFim:this._dataFim};
@@ -826,11 +896,50 @@ var CardVeiculo = (function (){
 
         // cria o botao do veículo
         this._btVeiculo = new BtVeiculo(id,logo,nome,cor,status,escopoBt,baseHTML);
+
+        // se tiver status ativo carrega dados 
+        if(status)_carregaDadosVeiculos();
     }
 
     var fn = CardVeiculo.prototype;
 
     // métodos privados
+    fn._carregaDadosVeiculo = function(){
+        var DADOS {};
+        
+        DADOS.carregaVeiculo = 1;
+        DADOS.IDVeiculo      = this._veiculoID;
+        DADOS.IDProposta     = this.IDProposta;
+
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: arqCriaEdita,
+            data: DADOS,
+            cache: false,
+            success: this._onDadosCarregados,
+            error: function(errorThrown){
+                console.log("Falha no AJAX! -- envio de dados página");
+                // str = JSON.stringify(errorThrown, null, 4);
+                // console.log('+++ '+errorThrown.responseText);
+                var saidaErr = _.unescape(errorThrown.responseText); 
+                window.open('about:blank').document.body.innerHTML = saidaErr;
+            } 
+        });
+    }
+
+    fn._onDadosCarregados = function(data){
+        if(!data.erro){
+            this.ativar();
+
+            // IMPLEMENTAR CARREGAMENTO DOS DADOS DE PRODUTOS E PERÍODOS
+
+        } else {
+
+        }
+        
+    }
+
     fn._excluiProdutos = function(idp){
         var posProduto = -1;
         
@@ -876,7 +985,7 @@ var CardVeiculo = (function (){
                     }
                 }
 
-                var novoProduto = new ProdutoVeiculo(this._veiculoID,++this._contaProduto ,itemProduto.nome, itemProduto.segmentacoes, this._$escopoProdutos);
+                var novoProduto = new ProdutoVeiculo(this._veiculoID, this._veiculoNome, ++this._contaProduto ,itemProduto.nome, itemProduto.segmentacoes, this._$escopoProdutos);
 
                 this._produtosAtivos.push(novoProduto);
                 this.atualizaDadosCabecalho();
@@ -892,27 +1001,27 @@ var CardVeiculo = (function (){
         for(var i=0; i<this._selectProdutos.length; i++){ listaPs += '<option value="'+this._selectProdutos[i]+'">'+this._selectProdutos[i]+'</option>'; }
 
         var containerCard = `
-        <div id="painel-x-card-${this._veiculoID}" class="x_panel" style="border-left: 3px solid ${this._veiculoCor};">
+        <div id="painel-x-card_${this._veiculoID}" class="x_panel" style="border-left: 3px solid ${this._veiculoCor};">
             <div class="x_title">
                 <img class="logo-ico-veiculo" src="${this._baseHtml}imgs/${this._veiculoLogo.ativo}">
-                <h2>${this._veiculoNome} (&nbsp<span id="cab-veiculo-contagem-${this._veiculoID}" style="color:inherit; margin: 0 -2px 0 -2px;">0</span>&nbsp)</h2>
+                <h2>${this._veiculoNome} (&nbsp<span id="cab-veiculo-contagem_${this._veiculoID}" style="color:inherit; margin: 0 -2px 0 -2px;">0</span>&nbsp)</h2>
                 <ul class="nav navbar-right panel_toolbox">
-                    <li><a id="cl-${this._veiculoID}" class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                    <li><a id="cl_${this._veiculoID}" class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                     </li>
                 </ul>
 
                 <div class="resumo-veiculo">
-                    <div style="display:inline-block" id="cab-veiculo-periodo-${this._veiculoID}">De 10/10/17 a 10/11/17</div>
-                    <div style="display:inline-block" > &nbsp | &nbsp  Investimento total: R$ <span id="cab-veiculo-investimento-${this._veiculoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
+                    <div style="display:inline-block" id="cab-veiculo-periodo_${this._veiculoID}">De 10/10/17 a 10/11/17</div>
+                    <div style="display:inline-block" > &nbsp | &nbsp  Investimento total: R$ <span id="cab-veiculo-investimento_${this._veiculoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
                     <div style="display:inline-block; margin-left:5px;">
-                        <select class="form-control select-menor" id="select-veic-${this._veiculoID}">${listaPs}</select>
+                        <select class="form-control select-menor" id="select-veic_${this._veiculoID}">${listaPs}</select>
                     </div>
                 </div>
 
                 <div class="clearfix"></div>
             </div>
             <div class="x_content">
-                <div id="container-produtos-${this._veiculoID}"  class="accordion" role="tablist" aria-multiselectable="true"></div>
+                <div id="container-produtos_${this._veiculoID}"  class="accordion" role="tablist" aria-multiselectable="true"></div>
 
                 <div class="col-xs-12" style="margin: 6px 0 -6px 0; padding-right:0;">
                     <button class="btn btn-primary" style="float:right; font-size: 9pt; margin-left:5px;" type="button" onclick="salvarProposta()">Salvar veículo</button>
@@ -925,10 +1034,10 @@ var CardVeiculo = (function (){
         this._$escopoGeral.append(containerCard);
 
         // ativa componentes
-        this._$escopoProdutos = $('#container-produtos-'+this._veiculoID);
-        this._$painelXCard    = $('#painel-x-card-'+this._veiculoID);
+        this._$escopoProdutos = $('#container-produtos_'+this._veiculoID);
+        this._$painelXCard    = $('#painel-x-card_'+this._veiculoID);
        
-        $('#select-veic-'+this._veiculoID).on('change', function() { 
+        $('#select-veic_'+this._veiculoID).on('change', function() { 
             if(this.value != "") {
                 self._inserirNovoProduto( this.value );
                 $(this).val("").attr("selected", true);
@@ -937,19 +1046,15 @@ var CardVeiculo = (function (){
 
         // chamada à função externa para ativar
         // a função de collapse do painel
-        ativaColapsedPanel("#cl-"+this._veiculoID);
+        ativaColapsedPanel("#cl_"+this._veiculoID);
     }
 
 
 
     // métodos públicos
-   fn.ativar = function (idProposta){
-        if(idProposta){
-            // TODO //////////////////////////////////
-        } else { 
-            // insere container card
-            this._renderContainerCard();
-        }
+   fn.ativar = function (){
+        this._ativo = true;
+        this._renderContainerCard();
     }
 
 
@@ -991,14 +1096,14 @@ var CardVeiculo = (function (){
         
         this._investimentoTotal = this._investimentoTotal.toFixed(2);
         //////////////
-        $('#cab-veiculo-contagem-'+this._veiculoID).empty();
-        $('#cab-veiculo-contagem-'+this._veiculoID).append(this._produtosAtivos.length);
+        $('#cab-veiculo-contagem_'+this._veiculoID).empty();
+        $('#cab-veiculo-contagem_'+this._veiculoID).append(this._produtosAtivos.length);
 
-        $('#cab-veiculo-periodo-'+this._veiculoID).empty();
-        $('#cab-veiculo-periodo-'+this._veiculoID).append('De '+this._dataInit+' a '+this._dataFim);
+        $('#cab-veiculo-periodo_'+this._veiculoID).empty();
+        $('#cab-veiculo-periodo_'+this._veiculoID).append('De '+this._dataInit+' a '+this._dataFim);
 
-        $('#cab-veiculo-investimento-'+this._veiculoID).empty(); //console.log('invest depois total '+this._investimentoTotal)
-        $('#cab-veiculo-investimento-'+this._veiculoID).append(formataDado(this._investimentoTotal));
+        $('#cab-veiculo-investimento_'+this._veiculoID).empty(); //console.log('invest depois total '+this._investimentoTotal)
+        $('#cab-veiculo-investimento_'+this._veiculoID).append(formataDado(this._investimentoTotal));
     }
     
     
@@ -1009,13 +1114,30 @@ var CardVeiculo = (function (){
     fn.excluir = function(){
         this._$painelXCard.remove(); 
         this._btVeiculo.desativar();
+        this._ativo = false;
     }
 
     fn.getID    = function (){ return this._veiculoID; }
     fn.getNome  = function (){ return this._veiculoNome; }
     fn.getAtivo = function (){ return this._ativo; }
+
     fn.getDados = function (){
-        // TODO //////////////////////////////////
+        var DADOS = [];
+        
+        if(this._produtosAtivos.length > 0){
+            for(var i=0; i<this._produtosAtivos.length; i++){
+                var p = this._produtosAtivos[i];
+                var dadosProdutos = p.getDados();
+                
+                if(dadosProdutos.erro){
+                    return {erro: dadosProdutos.erro};
+                } else {
+                    DADOS = DADOS.concat(dadosProdutos);
+                }
+            }
+        }
+
+        return DADOS;
     }
     
 

@@ -39,46 +39,40 @@
                         <label class="colunas-label-produtos form-group" style="/*width: 53px;*/">Agências</label>
                         <div class="Grid-cell colunas-form-produtos form-group">
                             <select id="proposta-agencia" class="form-control select-menor">
-                                <option value="">Escolha</option>
-                                <option value="Sem agência">Sem agência</option>
-                                <option value="Paim">Paim</option>
-                                <option value="Matriz">Matriz</option>
+                                    {{selectAgencias|raw}}
                             </select>
                         </div>
-
+ 
                         <label class="colunas-label-produtos form-group" style="/*width: 43px;">Clientes</label>
                         <div class="Grid-cell colunas-form-produtos form-group">
                             <select id="proposta-cliente" class="form-control select-menor">
-                                <option value="">Escolha</option>
-                                <option value="Zaffari">Zaffari</option>
-                                <option value="Unisinos">Unisinos</option>
-                                <option value="RBS">Gerdau</option>
+                                    {{selectClientes|raw}}
                             </select>
                         </div>
                         
                         <label class="colunas-label-produtos form-group" style="width: 85px;">Desc. cliente (%)</label>
                         <div class="colunas-form-produtos form-group" style="width: 60px;">
-                            <input id="proposta-desconto-cliente" type="text" class="form-control" style="padding:6px; text-align:center">
+                            <input id="proposta-desconto-cliente" type="text" class="form-control" style="padding:6px; text-align:center" value="{{descontoProposta}}">
                         </div>
 
                         <label class="colunas-label-produtos form-group" style="/*width: 35px;*/">Título</label>
                         <div class="Grid-cell colunas-form-produtos form-group">
-                            <input id="proposta-titulo" type="text" class="form-control">
+                            <input id="proposta-titulo" type="text" class="form-control" value="{{tituloProposta}}">
                         </div>
                         
                         <label class="colunas-label-produtos form-group" style="/*width: 47px;*/">Contato</label>
                         <div class="Grid-cell colunas-form-produtos form-group">
-                            <input id="proposta-contato" type="text" class="form-control">
+                            <input id="proposta-contato" type="text" class="form-control" value="{{contatoProposta}}">
                         </div>
                     </div>
                 </div>
                  <div style="position: relative; padding-right: 0; bottom: -11px; margin-top: -6px;">
                      <div style="float:left; padding-left:3px; padding-top:6px;">
-                        <div style="display:inline-block" >Período da proposta: <span id="">De 10/10/17 a 10/11/17</div>
+                        <div style="display:inline-block" >Período da proposta: <span id="periodo-proposta"> ---</div>
                         <div style="display:inline-block"> &nbsp; | &nbsp;  Investimento total: R$ <span id="" style="font-weight:600; color:#738cb9">0,00</span></div>
                      </div>
-                    <button class="btn btn-primary" style="float:right; font-size: 9pt; margin-left:5px; margin-bottom:5px;" type="button">Salvar proposta</button>
-                    <button class="btn btn-danger" style="float:right; font-size: 9pt;" type="button">Excluir proposta</button>
+                    <button class="btn btn-primary" style="float:right; font-size: 9pt; margin-left:5px; margin-bottom:5px;" type="button" onclick="salvarProposta()">Salvar proposta</button>
+                    <button class="btn btn-danger" style="float:right; font-size: 9pt;" type="button" onclick="excluirProposta()">Excluir proposta</button>
                 </div>
             </div>
         </div>
@@ -247,10 +241,28 @@
 {% endblock %}
 
 {% block scriptsjs %}
+
+    <script>
+        var IDProposta    = {{IDProposta}};
+        var listaVeiculos = [{% for veic in listaVeiculos %}
+                                {
+                                id: '{{ veic.id }}',
+                                logo_ativo: '{{ veic.logo_ativo }}',
+                                logo_inativo: '{{ veic.logo_inativo }}',
+                                nome: '{{ veic.nome }}',
+                                cor: '{{ veic.cor }}',
+                                regras: {{ veic.regras|raw }},
+                                status: {{ veic.status }}
+                                }{% if not loop.last %},{% endif %}
+                            {%  endfor %}];
+    </script>
+
     <script src="{{ __BASEHTML__ }}vendors/ion.rangeSlider/js/ion.rangeSlider.min.js"></script>
     <script src="{{ __BASEHTML__ }}vendors/jquery-mask/jquery.mask.min.js"></script>
 
     <script src="{{ __BASEHTML__ }}js/classes/proposta.js?{{random()}}"></script>
     <script src="{{ __BASEHTML__ }}js/secoes/componentes_cria_edita_proposta.js?{{random()}}"></script>
     <script src="{{ __BASEHTML__ }}js/secoes/cria_edita_proposta.js?{{random()}}"></script>
+
+    <script>{{MsgErro}}</script>
 {% endblock %}

@@ -45,7 +45,7 @@ function salvarDadosVeiculo(tabela, id, nome, tipo){
 
 function gravarDados(DADOS){
     if(DADOS.operacao == 0){
-        callModalMenor('Confirma excluir '+DADOS.origem+' '+DADOS.nome+'?', 'Esta operação não pode ser desfeita.', function(){callAjax(DADOS)});
+        callModalMenor('CONFIRMA EXCLUIR '+DADOS.origem+' '+DADOS.nome+'?', 'Esta operação não pode ser desfeita.', function(){callAjax(DADOS)});
     } else {
         callAjax(DADOS);
     }

@@ -273,6 +273,6 @@ td > .irs{
 /* modais */
 @media (min-width: 768px){
     .modal-sm {
-        width: 430px;
+        width: 500px;
     }
 }

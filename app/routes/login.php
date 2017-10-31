@@ -8,7 +8,8 @@ if (session_status() == PHP_SESSION_NONE) {
 
 $app->get('/', function() use($app){
 	if(isset($_SESSION['logadoproposta'])){
-		$app->redirect($app->urlFor('lista-propostas'));
+		// $app->redirect($app->urlFor('lista-propostas'));
+		redir('lista-propostas');
 	} else {
 		$app->render('login.html');
 	}
@@ -29,7 +30,8 @@ $app->post('/', function() use ($app) {
 
 			$_SESSION['logadoproposta'] = true;
 
-			$app->redirect($app->urlFor('lista-propostas'));
+			// $app->redirect($app->urlFor('lista-propostas'));
+			redir('lista-propostas');
 		} else {
 			$app->render('login.html',['ERRO_LOGIN' => 1]);
 		}
@@ -39,10 +41,19 @@ $app->post('/', function() use ($app) {
 
 $app->get('/fechasessao', function() use($app){
 	if (session_status() != PHP_SESSION_NONE) session_destroy();
-	$app->redirect($app->urlFor('login'));
+	// $app->redirect($app->urlFor('login'));
+	redir();
 
 })->setName('closesession'); 
 
 
+
+function redir($url=''){
+	echo'
+	<script>
+	window.location.href = "./'.$url.'";
+	</script>
+	';
+}
 
  ?>
