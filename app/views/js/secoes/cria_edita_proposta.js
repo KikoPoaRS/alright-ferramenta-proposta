@@ -152,9 +152,15 @@ function onDadosSalvos(data){ //console.log('>>>>> '+JSON.stringify(data, null, 
             // se a proposta foi excluida redireciona para a página de listagem
             window.location.href = "../lista-propostas";
         } else { // ATUALIZAR
+            // retornod e novos períodos salvos
+            if(data.periodos) document.dispatchEvent(new CustomEvent("eventoFeedbackSalvarPeriodos",{ "detail": {'periodosSalvos':data.periodos} }));
             op = ' atualizada ';
         }
-        chamaModalFeedback('PROPOSTAS ALRIGHT!', 'Proposta <strong>'+$('#proposta-titulo').val()+'</strong> ('+IDProposta+') '+op+'com sucesso!');
+
+        var msg = 'Proposta <strong>'+$('#proposta-titulo').val()+'</strong> ('+IDProposta+') '+op+'com sucesso!';
+        if(data.erro_periodos) msg += '<br><strong>-- '+data.erro_periodos+'--</strong>';
+
+        chamaModalFeedback('PROPOSTAS ALRIGHT!', msg);
     } else { // se tiver erro
         chamaModalFeedback('<span style="color:red;">ERRO DE OPERAÇÃO</span>', data.erro);
     }

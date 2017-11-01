@@ -99,7 +99,7 @@ var BtVeiculo = (function(){
 
 var PeriodoProduto = (function(){
     // construtor
-    function PeriodoProduto(vid, linha, grupo, idproduto, regras, container, idTabela = 0){
+    function PeriodoProduto(vid, linha, grupo, idproduto, regras, container, dados = null){
         // objeto com as regras recebidas - id | nome | descontoMax | investMinimo | tipoCompra | CUB | CUL                     
         this._veiculoID         = vid;
         this._regrasPeriodo     = regras;
@@ -108,7 +108,7 @@ var PeriodoProduto = (function(){
         this._grupo             = grupo;
         this._linha             = linha;
         this._periodoID         = idproduto+'_'+linha; // id do elemento html
-        this._periodoIDtabela   = idTabela; // id do registro na tabela
+        this._periodoIDtabela   = dados ? dados.idPeriodo : 0; // id do registro na tabela
         this._$container        = $('#'+container);
 
         this._listaMeses        = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -158,6 +158,22 @@ var PeriodoProduto = (function(){
             this._selectAnos += '<option value="20'+anos+'"'+selected+'>'+anos+'</option>';;
         }
 
+        ///////////////////////////////////////////
+        // EVENTOS ////////////////////////////////
+
+        var self = this;
+
+        document.addEventListener('eventoFeedbackSalvarPeriodos',function (e) {
+            for(var i = 0; i<e.detail.periodosSalvos.length; i++){
+                var dados     = e.detail.periodosSalvos[i];
+                var atualizar = dados.idVeiculo == self._veiculoID && dados.idRegra == self._regrasPeriodo.id && dados.grupo == self._grupo && dados.linha == self._linha;
+                
+                if(atualizar){
+                    self._periodoIDtabela = dados.idPeriodo;
+                    i=e.detail.periodosSalvos.length;
+                }
+            }
+        });
        //////////////////////////
 
         this._renderPeriodo();
@@ -238,12 +254,21 @@ var PeriodoProduto = (function(){
         });
 
         this._$elmDesconto.blur(function(){
-            var dmax = parseFloat(formataDado(self._regrasPeriodo.descontoMax,'R$',true));
-            if(parseFloat(self._desconto)>dmax){
-                self._desconto = dmax;
-                self._$elmDesconto.val(self._regrasPeriodo.descontoMax);
-                // chamas modal de alert para aviso sobre limite de desconto
-                callModalMenor('ATENÇÃO : Limite de desconto excedido!', 'O desconto máximo a ser aplicado ao cliente deve ser de <strong>'+self._regrasPeriodo.descontoMax+'%<strong>');
+            var dsc = self._$elmDesconto.val();
+
+            if(dsc != ''){ 
+                var ardsc = dsc.split(',');
+                if(ardsc.length != 2 || ardsc[0] == ''){
+                    callModalMenor('DADO FORA DE FORMATAÇÃO!', 'Para o <strong>desconto</strong> considere o valor com duas casas após a vírgula!');
+                } else {
+                    var dmax = parseFloat(formataDado(self._regrasPeriodo.descontoMax,'R$',true));
+                    if(parseFloat(self._desconto)>dmax){
+                        self._desconto = dmax;
+                        self._$elmDesconto.val(self._regrasPeriodo.descontoMax);
+                        // chamas modal de alert para aviso sobre limite de desconto
+                        callModalMenor('LIMITE DE DESCONTO EXCEDIDO!', 'O desconto máximo a ser aplicado ao cliente deve ser de <strong>'+self._regrasPeriodo.descontoMax+'%<strong>');
+                    }
+                }
             }
         })
 
@@ -362,17 +387,17 @@ var PeriodoProduto = (function(){
         dadosPeriodo.idPeriodo    = this._periodoIDtabela;
         dadosPeriodo.idProposta   = IDProposta;
         dadosPeriodo.idVeiculo    = this._veiculoID;
-        dadosPeriodo.idRegras     = this._regrasPeriodo.id;
+        dadosPeriodo.idRegra      = this._regrasPeriodo.id;
         dadosPeriodo.grupo        = this._grupo;
         dadosPeriodo.linha        = this._linha;
         dadosPeriodo.target       = target;
         dadosPeriodo.praca        = praca;
         dadosPeriodo.dataInit     = datas.fullInit; 
         dadosPeriodo.dataFim      = datas.fullFim; 
-        dadosPeriodo.totalBruto   = this._totalCustoBruto;
-        dadosPeriodo.totalLiquido = this._totalCustoLiquido;
-        dadosPeriodo.desconto     = parseFloat(this._desconto);
-
+        dadosPeriodo.totalBruto   = parseFloat(this._totalCustoBruto);
+        dadosPeriodo.totalLiquido = parseFloat(this._totalCustoLiquido);
+        dadosPeriodo.desconto     = this._$elmDesconto.val(); //this._desconto;
+        
         if(dadosPeriodo.totalBruto == '' || dadosPeriodo.totalBruto == 0) return false;
 
         return dadosPeriodo;
@@ -391,8 +416,8 @@ var PeriodoProduto = (function(){
         p.ano      = this._anoAtivo;
 
         if(salvar){
-            p.fullInit = this._anoAtivo+'/'+this._mesAtivo+'/'+di;
-            p.fullFim  = this._anoAtivo+'/'+this._mesAtivo+'/'+df;
+            p.fullInit = '20'+this._anoAtivo+'-'+this._mesAtivo+'-'+di+' 00:00:00';
+            p.fullFim  = '20'+this._anoAtivo+'-'+this._mesAtivo+'-'+df+' 00:00:00';
         } else {
             p.fullInit = di+'/'+this._mesAtivo+'/'+this._anoAtivo;
             p.fullFim  = df+'/'+this._mesAtivo+'/'+this._anoAtivo;
@@ -404,6 +429,8 @@ var PeriodoProduto = (function(){
     fn.getInvestimento = function(){ return this._totalCustoBruto; }
 
     fn.getDesconto = function(){ return this._desconto; }
+
+    fn.getLinha = function(){ return this._linha; }
     
     fn.getIDtabela = function(){ return this._periodoIDtabela; }
     
@@ -423,7 +450,8 @@ var PeriodoProduto = (function(){
 var ProdutoVeiculo = (function(){
 
     // construtor
-    function ProdutoVeiculo(idv, nomev, idp, nome, segmentacoes, escopo){
+    function ProdutoVeiculo(idv, nomev, idp, nome, segmentacoes, escopo, dados = null){
+        this._DADOS              = dados;
         this._veiculoID          = idv;
         this._veiculoNome        = nomev;
         this._grupo              = idp;
@@ -431,21 +459,22 @@ var ProdutoVeiculo = (function(){
         this._produtoNome        = nome;
         this._$escopoProdutos    = escopo;
         this._listaSegmentacoes  = segmentacoes;
-        this._descontoMaximo     = null;
-        this._target             = null;
-        this._praca              = null;
+        this._descontoMaximo     = dados ? dados.descontoMax : '';
+        this._target             = dados ? dados.target : '';
+        this._praca              = dados ? dados.praca : '';
         this._formatoAtivo       = null;
-        this._$elementoProduto   = null;
+        
         this._selectSegmentacoes = [];
         this._listaFormatos      = [];
         this._selectFormatos     = [];
         this._listaPeriodos      = [];
-        this._dataInit           = '--';
-        this._dataFim            = '--';
+        this._dataInit           = dados ? dados.dataInit : '--';
+        this._dataFim            = dados ? dados.dataFim : '--';
         this._investimentoTotal  = 0;
-        this._contaPeriodos      = 0;
+        this._contaPeriodos      = dados ? dados.periodos.length : 0;
 
         // elementos html
+        this._$elementoProduto   = null;
         this._$elmSelectFormatos = null;
         this._$elmDescontoMax    = null;
         this._$elmTabelaPeriodos = null;
@@ -483,7 +512,7 @@ var ProdutoVeiculo = (function(){
         })
         
         
-        this._configuraSegmentacoes();
+        this._configuraSegmentacoes(this._DADOS);
         this.atualizaDadosCabecalho();
 
     }
@@ -520,7 +549,7 @@ var ProdutoVeiculo = (function(){
         }
     }
 
-    fn._configuraSegmentacoes = function(){
+    fn._configuraSegmentacoes = function(dados=null){
         this._selectSegmentacoes = [];
 
         for(var i=0; i< this._listaSegmentacoes.length; i++){
@@ -528,11 +557,10 @@ var ProdutoVeiculo = (function(){
              this._selectSegmentacoes.push(itemSegmentacao.nome);
         }
 
-        this._renderProduto();
+        this._renderProduto(dados);
     }
 
-    fn._ativarSegmentacao = function(segmentacao){ 
-        //console.log(this._produtoID+' :: segmentacao ativa '+segmentacao);
+    fn._ativarSegmentacao = function(segmentacao, dados=null){  // console.log(this._produtoID+' :: segmentacao ativa '+segmentacao);
         // configura select de formatos    
         for(var i=0; i<this._listaSegmentacoes.length; i++){
             var seg = this._listaSegmentacoes[i];
@@ -553,18 +581,25 @@ var ProdutoVeiculo = (function(){
 
                 for(k=0; k<this._selectFormatos.length; k++){
                     var frms = this._selectFormatos[k];
-                    listaFrm += '<option value="'+frms+'">'+frms+'</option>'; 
+                    var selected = '';
+
+                    if(dados && dados.formato == frms) selected = 'selected';
+
+                    listaFrm += '<option value="'+frms+'" '+selected+'>'+frms+'</option>'; 
                 }
 
                 this._$elmSelectFormatos.empty();
                 this._$elmSelectFormatos.append(listaFrm);
-                this._aplicarFormato(seg.formatos[0].nome);
+
+                var formDados = dados ? dados.formato : seg.formatos[0].nome;
+
+                this._aplicarFormato(formDados);
             }
         }
     }
 
-    fn._aplicarFormato = function(formato){ //console.log('>>>> '+formato)
-        for(var i=0; i<this._listaFormatos.length; i++){
+    fn._aplicarFormato = function(formato){
+        for(var i = 0; i<this._listaFormatos.length; i++){
             var frm = this._listaFormatos[i];
             if(formato == frm.nome){ //console.log('nome: '+frm.nome+' | desk max '+frm.descontoMax)
 
@@ -582,24 +617,47 @@ var ProdutoVeiculo = (function(){
         if(this._listaPeriodos.length > 0){
             for(var i=0; i<this._listaPeriodos.length; i++){
                 // TODO
+                var p = this._listaPeriodos[i];             
             }
         }
         
         //console.log('formato ATIVO: '+JSON.stringify(frm, null, 4));
     }
 
-    fn._criarPeriodo = function(){
-        var novoPeriodo = new PeriodoProduto(this._veiculoID, ++this._contaPeriodos, this._grupo, this._produtoID, this._formatoAtivo, this._$elmTabelaPeriodos.attr('id'),0);
+    fn._criarPeriodo = function(dadosPeriodo=null){
+        var grupo = dadosPeriodo ? dadosPeriodo.grupo : this._grupo;
+
+        if(dadosPeriodo){
+            linha = this._contaPeriodos = dadosPeriodo.linha;
+        } else {
+            if(this._listaPeriodos.length == 0){
+                for(j=0; j<this._listaPeriodos.length; j++){
+                    var pa = this._listaPeriodos[j];
+                    if(pa.getLinha() >= this._contaPeriodos) this._contaPeriodos = pa.getLinha()+1;
+                }
+                linha = this._contaPeriodos;
+            } else {
+                linha = ++this._contaPeriodos;
+            }
+        }
+        
+
+        var novoPeriodo = new PeriodoProduto(this._veiculoID, linha, grupo, this._produtoID, this._formatoAtivo, this._$elmTabelaPeriodos.attr('id'),dadosPeriodo);
+        
         this._listaPeriodos.push(novoPeriodo);
     }
 
-    fn._renderProduto = function(){
+    fn._renderProduto = function(dados=null){
         // monta select de produtos
         var listaSegs = '';
 
         for(var i=0; i<this._selectSegmentacoes.length; i++){ 
             var segs = this._selectSegmentacoes[i];
-            listaSegs += '<option value="'+segs+'">'+segs+'</option>'; 
+            var selected = '';
+            
+            if(dados && dados.segmentacao == segs) selected = 'selected';
+
+            listaSegs += '<option value="'+segs+'" '+selected+'>'+segs+'</option>'; 
         }
         
         var containerProduto = `
@@ -623,12 +681,12 @@ var ProdutoVeiculo = (function(){
                     <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding: 0;">
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 35px;">Target</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <input id="target_${this._produtoID}" type="text" placeholder="Digite o target" class="form-control">
+                            <input id="target_${this._produtoID}" type="text" placeholder="Digite o target" class="form-control" value="${this._target}">
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 33px;">Praça</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <input id="praca_${this._produtoID}" type="text" placeholder="Digite a praça" class="form-control">
+                            <input id="praca_${this._produtoID}" type="text" placeholder="Digite a praça" class="form-control" value="${this._praca}">
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 47px;">Formato</label>
@@ -714,8 +772,18 @@ var ProdutoVeiculo = (function(){
         })
 
         // ativa a primeira segmentação
-        this._ativarSegmentacao(this._selectSegmentacoes[0]);
-        this._criarPeriodo();
+        var segm = dados ? dados.segmentacao : this._selectSegmentacoes[0];
+        this._ativarSegmentacao(segm,dados);
+
+        if(dados){
+            for(var k=0; k<dados.periodos.length; k++){
+                var periodo = dados.periodos[k];
+                this._criarPeriodo(periodo);
+            }
+        } else {
+            this._criarPeriodo();
+        }
+        
     }
 
     
@@ -781,6 +849,7 @@ var ProdutoVeiculo = (function(){
     }
 
     fn.getID = function(){ return this._produtoID; }
+    fn.getGrupo = function(){ return this._grupo; }
 
     fn.getDados = function(){ 
         this._target = this._$elmTarget.val();
@@ -889,6 +958,29 @@ var CardVeiculo = (function (){
             self.atualizaDadosCabecalho();
         })
 
+        this._onDadosCarregados = function(data){
+            if(!data.erro){
+    
+                if(data.listaProdutos && data.listaProdutos.length > 0){ console.log('LISTA PRODUTOS >>> ' + JSON.stringify(data.listaProdutos, null, 4));
+                    // renderiza o container do card
+                    self.ativar(); 
+
+                    // insere novo produto para item do array principal
+                    for(var i=0; i<data.listaProdutos.length; i++){ // 
+                        var P = data.listaProdutos[i];
+                        self._inserirNovoProduto(P);
+                    }
+                }
+                
+    
+                // IMPLEMENTAR CARREGAMENTO DOS DADOS DE PRODUTOS E PERÍODOS
+    
+            } else {
+                console.log('erro de carregamento de dados de veículos '+data.erro)
+            }
+            
+        }
+
         ////////////////////////////////////////////
         ////////////////////////////////////////////
 
@@ -898,18 +990,18 @@ var CardVeiculo = (function (){
         this._btVeiculo = new BtVeiculo(id,logo,nome,cor,status,escopoBt,baseHTML);
 
         // se tiver status ativo carrega dados 
-        if(status)_carregaDadosVeiculos();
+        if(status) this._carregaDadosVeiculos();
     }
 
     var fn = CardVeiculo.prototype;
 
     // métodos privados
-    fn._carregaDadosVeiculo = function(){
-        var DADOS {};
+    fn._carregaDadosVeiculos = function(){
+        var DADOS = {};
         
         DADOS.carregaVeiculo = 1;
         DADOS.IDVeiculo      = this._veiculoID;
-        DADOS.IDProposta     = this.IDProposta;
+        DADOS.IDProposta     = IDProposta;
 
         $.ajax({
             type: 'POST',
@@ -926,18 +1018,6 @@ var CardVeiculo = (function (){
                 window.open('about:blank').document.body.innerHTML = saidaErr;
             } 
         });
-    }
-
-    fn._onDadosCarregados = function(data){
-        if(!data.erro){
-            this.ativar();
-
-            // IMPLEMENTAR CARREGAMENTO DOS DADOS DE PRODUTOS E PERÍODOS
-
-        } else {
-
-        }
-        
     }
 
     fn._excluiProdutos = function(idp){
@@ -971,10 +1051,14 @@ var CardVeiculo = (function (){
         }
     }
 
-    fn._inserirNovoProduto = function(produto){
+    fn._inserirNovoProduto = function(pr){
+
+       var produto = typeof pr === 'string' ? pr : pr.produto;
+
         // localiza o produto dentro da lista de regras
         for(var i=0; i<this._listaRegras.length; i++){
             var itemProduto = this._listaRegras[i];
+            var grupo, dados = null;
 
             if(itemProduto.nome == produto){
                 // fecha abas dos produtos abertos, se hovuer
@@ -985,7 +1069,23 @@ var CardVeiculo = (function (){
                     }
                 }
 
-                var novoProduto = new ProdutoVeiculo(this._veiculoID, this._veiculoNome, ++this._contaProduto ,itemProduto.nome, itemProduto.segmentacoes, this._$escopoProdutos);
+                if(typeof pr === 'string'){
+                    if(this._produtosAtivos.length == 0){
+                        for(j=0; j<this._produtosAtivos.length; j++){
+                            var pa = this._produtosAtivos[j];
+                            if(pa.getGrupo() >= this._contaProduto) this._contaProduto = pa.getGrupo()+1;
+                        }
+                        grupo = this._contaProduto;
+                    } else {
+                        grupo = ++this._contaProduto;
+                    }
+                    
+                } else {
+                    dados = pr;
+                    this._contaProduto = grupo = parseInt(pr.grupo);
+                }
+
+                var novoProduto = new ProdutoVeiculo(this._veiculoID, this._veiculoNome, grupo, itemProduto.nome, itemProduto.segmentacoes, this._$escopoProdutos, dados);
 
                 this._produtosAtivos.push(novoProduto);
                 this.atualizaDadosCabecalho();

@@ -62,8 +62,11 @@ $app->get('/edita-proposta(/:idp)', function($idp=0) use($app){
 				$dados['logo_inativo'] = $v->img_logo_inativo;
 				$dados['nome']         = $v->nome;
 				$dados['cor']          = $v->cor;
-				
-				$dados['status']       = 0;
+
+				$regraAtiva = null;
+				if($idp != 0) $regraAtiva = propostas_periodo::find_by_propostas_id_and_veiculos_id($idp,$v->id);
+				$dados['status'] = $regraAtiva ? 1 : 0;
+
 				array_push($listaVeiculos,$dados);
 			}
 		}
@@ -104,7 +107,7 @@ function pegaRegrasVeiculo($idv){
 	if(count($regras)>0){
 		foreach($regras as $r){
 			$arrFtmp = array();
-			$arrFtmp['IDregra']      = $r->id;
+			$arrFtmp['id']           = $r->id;
 			$arrFtmp['nome']         = $r->formato;
 			$arrFtmp['descontoMax']  = $r->desconto_max;
 			$arrFtmp['investMinimo'] = $r->investimento_minimo;
