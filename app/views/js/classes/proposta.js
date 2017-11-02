@@ -100,7 +100,8 @@ var BtVeiculo = (function(){
 var PeriodoProduto = (function(){
     // construtor
     function PeriodoProduto(vid, linha, grupo, idproduto, regras, container, dados = null){
-        // objeto com as regras recebidas - id | nome | descontoMax | investMinimo | tipoCompra | CUB | CUL                     
+        // objeto com as regras recebidas - id | nome | descontoMax | investMinimo | tipoCompra | CUB | CUL      
+        this._DADOS             = dados;               
         this._veiculoID         = vid;
         this._regrasPeriodo     = regras;
         this._regrasPeriodo.CUB = parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
@@ -119,13 +120,13 @@ var PeriodoProduto = (function(){
     
         // define valores default para mes ativo e ano ativo
         // this._mesAtivo          = this._listaMeses[parseInt((new Date).getMonth())];
-        this._mesAtivo          = (new Date).getMonth()+1;
-        this._anoAtivo          = String((new Date).getFullYear()).substring(2,4);
-        this._diaInit           = (new Date).getDay();                  
-        this._diaFim            = (new Date).getDay() <= 15 ? 15 : this._listaDiasMeses[this._mesAtivo-1];   // valor default
-        this._totalCustoBruto   = 0;
+        this._mesAtivo          = dados ? dados.dataInit.split('/')[1] : (new Date).getMonth()+1;
+        this._anoAtivo          = dados ? dados.dataInit.split('/')[2] : String((new Date).getFullYear()).substring(2,4);
+        this._diaInit           = dados ? dados.dataInit.split('/')[0] : (new Date).getDay();                  
+        this._diaFim            = dados ? dados.dataFim.split('/')[0] : (new Date).getDay() <= 15 ? 15 : this._listaDiasMeses[this._mesAtivo-1];   // valor default
+        this._totalCustoBruto   = dados ? dados.totBruto : 0;
         this._volumeContratado  = 0;
-        this._desconto          = 0;
+        this._desconto          = dados ? parseFloat(formataDado(dados.desconto,'R$',true)) : 0;
         this._CUB_N             = null;
         this._CUL_N             = null;
         this._totalCustoLiquido = null;
@@ -185,6 +186,14 @@ var PeriodoProduto = (function(){
     fn._anoBissexto = function(ano){ return ((parseInt(ano) % 4) == 0 && (parseInt(ano) % 100)!=0) || ((parseInt(ano) % 100)!=0 ) }
 
     fn._renderPeriodo = function(){
+        var valCustoBruto = '';
+        var valDesconto = '';
+
+        if(this._DADOS){
+            valCustoBruto = formataDado(this._totalCustoBruto);
+            valDesconto = this._DADOS.desconto;
+        }
+
         var elemPeriodo = `
         <tr id="periodo_${this._periodoID}">
             <td style="padding-left:0; padding-right:0">
@@ -196,12 +205,12 @@ var PeriodoProduto = (function(){
             <td style="padding-bottom:0; min-width:120px;">
                 <input type="text" id="per-slider_${this._periodoID}" name="per-slider_${this._periodoID}" value="" />
             </td>
-            <td style="width:100px;"><input id="per-totbruto_${this._periodoID}" style="padding:5px; text-align:right;" type="text" class="form-control" value=""></td>
+            <td style="width:100px;"><input id="per-totbruto_${this._periodoID}" style="padding:5px; text-align:right;" type="text" class="form-control" value="${valCustoBruto}"></td>
             <td style="text-align:center;"><span id="per-volcontratado_${this._periodoID}"></span></td>
             <td><span id="per-tipocompra_${this._periodoID}"></span></td>
             <td style="min-width:50px;">R$ <span id="per-CUB_${this._periodoID}"></span></td>
             <td style="min-width:50px;">R$ <span id="per-CUL_${this._periodoID}"></span></td>
-            <td style="max-width:65px;"><input id="per-desconto_${this._periodoID}" type="text" class="form-control" value="" style="width:55px;"></td>
+            <td style="max-width:65px;"><input id="per-desconto_${this._periodoID}" type="text" class="form-control" value="${valDesconto}" style="width:55px;"></td>
             <td style="min-width:50px;">R$ <span id="per-CUBN_${this._periodoID}"></span></td>
             <td style="min-width:50px;">R$ <span id="per-CULN_${this._periodoID}"></span></td>
             <td style="min-width: 85px;"><div style="color:black; font-weight:600">R$ <span id="per-totliquido_${this._periodoID}"></span></div></td>
@@ -279,7 +288,7 @@ var PeriodoProduto = (function(){
         // ativa bt excluir
        
         $('#per-btexcluir_'+this._periodoID).click(function() {
-            document.dispatchEvent(new CustomEvent("eventoExcluiPeriodo",{ "detail": {'periodoID':self._periodoID} }));
+            document.dispatchEvent(new CustomEvent("eventoExcluiPeriodo",{ "detail": {'periodoID':self._periodoID,'produtoID':self._produtoID} }));
         })
 
         this._$elmSelectMeses.on('change', function() { 
@@ -312,7 +321,7 @@ var PeriodoProduto = (function(){
 
         sliderDias.update({
            max:diasmes,
-           to: this._diaFim,//    from: 1
+           to: this._diaFim,
        })
 
        // atualiza dados dos cabeçalhos
@@ -380,7 +389,6 @@ var PeriodoProduto = (function(){
     }
 
     fn.getDados = function (target,praca){
-        // TODO //////////////////////////////////
         var dadosPeriodo = {};
         var datas = this.getDatas(true);
 
@@ -396,7 +404,7 @@ var PeriodoProduto = (function(){
         dadosPeriodo.dataFim      = datas.fullFim; 
         dadosPeriodo.totalBruto   = parseFloat(this._totalCustoBruto);
         dadosPeriodo.totalLiquido = parseFloat(this._totalCustoLiquido);
-        dadosPeriodo.desconto     = this._$elmDesconto.val(); //this._desconto;
+        dadosPeriodo.desconto     = this._$elmDesconto.val();
         
         if(dadosPeriodo.totalBruto == '' || dadosPeriodo.totalBruto == 0) return false;
 
@@ -407,8 +415,8 @@ var PeriodoProduto = (function(){
 
     fn.getDatas = function (salvar = false){
         var p = {};
-        var di = this._diaInit < 10 ? '0'+this._diaInit : this._diaInit;
-        var df = this._diaFim < 10 ? '0'+this._diaFim : this._diaFim;
+        var di = String(this._diaInit).length == 1 ? '0'+this._diaInit : this._diaInit;
+        var df = String(this._diaFim).length == 1 ? '0'+this._diaFim : this._diaFim;
 
         p.diaInit  = di;
         p.diaFim   = df;
@@ -416,8 +424,10 @@ var PeriodoProduto = (function(){
         p.ano      = this._anoAtivo;
 
         if(salvar){
-            p.fullInit = '20'+this._anoAtivo+'-'+this._mesAtivo+'-'+di+' 00:00:00';
-            p.fullFim  = '20'+this._anoAtivo+'-'+this._mesAtivo+'-'+df+' 00:00:00';
+            var ano = String(this._anoAtivo).length == 4 ? this._anoAtivo : '20'+this._anoAtivo;
+
+            p.fullInit = ano+'-'+this._mesAtivo+'-'+di+' 00:00:00';
+            p.fullFim  = ano+'-'+this._mesAtivo+'-'+df+' 00:00:00';
         } else {
             p.fullInit = di+'/'+this._mesAtivo+'/'+this._anoAtivo;
             p.fullFim  = df+'/'+this._mesAtivo+'/'+this._anoAtivo;
@@ -487,66 +497,163 @@ var ProdutoVeiculo = (function(){
         // EVENTOS ////////////////////////////////
 
         var self = this;
+
+        this._onDadosExcluidos = function(data){
+            if(!data.erro){
+                var msg = 'Nenhum registro excluido.';
+
+                if(data.excluiPeriodo){
+                    posPeriodo = -1;
+                    
+                    for(var i=0; i<self._listaPeriodos.length; i++){
+                        var p = self._listaPeriodos[i];
+        
+                        if(data.IDinterno == p.getID()){
+                            p.excluir();
+                            self._listaPeriodos[i] = p = null;
+                            posPeriodo = i;
+                        }
+                    }
+    
+                    if(posPeriodo > -1){
+                        self._listaPeriodos.splice(posPeriodo,1);
+                        self.atualizaDadosCabecalho();
+                        msg = 'Período excluido com sucesso.'
+                    }
+
+                } else if(data.excluiProduto){
+                    for(var i=0; i<self._listaPeriodos.length; i++){
+                        var p = self._listaPeriodos[i];
+                        p.excluir();
+                        self._listaPeriodos[i] = p = null;
+                    }
+                    self._listaPeriodos = [];
+                    self.atualizaDadosCabecalho();
+                    msg = 'Produto excluido com sucesso!';
+                }
+
+                chamaModalFeedback('OPERAÇÃO FINALIZADA!', msg);
+
+            } else {
+                chamaModalFeedback('<span style="color:red;">ERRO DE OPERAÇÃO</span>', data.erro);
+            }
+        }
              
         document.addEventListener('eventoExcluiPeriodo',function (e) {
-            var posPeriodo = -1;
-
-            if(self._listaPeriodos.length == 1){
-                callModalMenor('ESTE PERÍODO NÃO PODE SER EXCLUIDO!', 'Cada produto selecionado deve ter no mínimo um período definido.'); // chamada à função externa da modal
-            } else {
-                callModalMenor('CONFIRMA EXCLUIR PERÍODO?', 
-                'Os dados relativos a este período serão excluidos imediatamente da tela de edição e da base de dados.',
-                function(){self._excluiPeriodos(e.detail.periodoID)});
+            if(e.detail.produtoID == self._produtoID){
+                if(self._listaPeriodos.length == 1){
+                    callModalMenor('ESTE PERÍODO NÃO PODE SER EXCLUIDO!', 'Cada produto selecionado deve ter no mínimo um período definido.'); // chamada à função externa da modal
+                } else {
+                    callModalMenor('CONFIRMA EXCLUIR PERÍODO?', 
+                    'Os dados relativos a este período serão excluidos imediatamente da tela de edição e da base de dados.',
+                    function(){self._excluiPeriodos(e.detail.periodoID)});
+                }
             }
         });
 
         document.addEventListener('eventoAtualizaCabecalhoProduto',function (e) {
             for(var i=0; i<self._listaPeriodos.length; i++){
                 var p = self._listaPeriodos[i];
-                
-                if(e.detail.periodoID == p.getID()){
-                    self.atualizaDadosCabecalho();
-                    document.dispatchEvent(new CustomEvent("eventoAtualizaCabecalhoVeiculo",{ "detail": {'produtoID':self._produtoID} }));
-                }
+                if(e.detail.periodoID == p.getID()) self.atualizaDadosCabecalho();
             }
         })
         
-        
         this._configuraSegmentacoes(this._DADOS);
         this.atualizaDadosCabecalho();
-
     }
+
 
     var fn = ProdutoVeiculo.prototype;
 
+
     // métodos privados
-    fn._excluiPeriodos = function(idp){
-        if(this._listaPeriodos.length > 0){
+    fn._excluiPeriodos = function(idp, excluiMacro){
+        if(excluiMacro){
             for(var i=0; i<this._listaPeriodos.length; i++){
                 var p = this._listaPeriodos[i];
+                p.excluir();
+                this._listaPeriodos[i] = p = null;
+            }
+            this._listaPeriodos = [];
+            this.atualizaDadosCabecalho();
+        } else {
+            if(idp){
+                if(this._listaPeriodos.length > 0){
+                    posPeriodo = -1;
 
-                if(!idp || idp == p.getID()){
-                    // REMOVE DO BANCO
-                    if(p.getIDtabela() != 0){
-
+                    for(var i=0; i<this._listaPeriodos.length; i++){
+                        var p = this._listaPeriodos[i];
+        
+                        if(idp == p.getID()){
+                            // REMOVE DO BANCO
+                            if(p.getIDtabela() != 0){
+                                this._excluiDadosPeriodos(p);
+                            } else { // se não tiver no banco, remove somente do front
+                                p.excluir();
+                                this._listaPeriodos[i] = p = null;
+                                posPeriodo = i;
+                            }
+                        }
                     }
 
-                    p.excluir();
-                    this._listaPeriodos[i] = p = null;
-                    posPeriodo = i;
+                    if(posPeriodo > -1){
+                        this._listaPeriodos.splice(posPeriodo,1);
+                        this.atualizaDadosCabecalho();
+                    }
+                }
 
+            } else {
+                var somenteNaoSalvo = true;
+
+                for(var i=0; i<this._listaPeriodos.length; i++){
+                    var p = this._listaPeriodos[i];
+                    if(p.getIDtabela() != 0) somenteNaoSalvo = false;
+                }
+
+                if(somenteNaoSalvo){
+                    for(var i=0; i<this._listaPeriodos.length; i++){
+                        var p = this._listaPeriodos[i];
+                        p.excluir();
+                        this._listaPeriodos[i] = p = null;
+                    }
+                    this._listaPeriodos = [];
+                } else {
+                    this._excluiDadosPeriodos();
                 }
             }
-
-            // remove o período do array
-            if(!idp){
-                this._listaPeriodos = [];
-            } else {
-                if(posPeriodo > -1) this._listaPeriodos.splice(posPeriodo,1);
-            }
-            
-            this.atualizaDadosCabecalho();
         }
+    }
+
+
+    fn._excluiDadosPeriodos = function(periodo){
+        var DADOS = {};
+        DADOS.IDProposta = IDProposta;
+
+        if(periodo){
+            DADOS.excluiPeriodo  = 1;
+            DADOS.IDperiodo      = periodo.getIDtabela();
+            DADOS.IDinterno      = periodo.getID();
+        } else {
+            DADOS.excluiProduto = 1;
+            DADOS.IDRegra       = this._formatoAtivo.id; 
+            DADOS.grupo         = this._grupo;
+        }
+
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: arqCriaEdita,
+            data: DADOS,
+            cache: false,
+            success: this._onDadosExcluidos,
+            error: function(errorThrown){
+                console.log("Falha no AJAX! -- envio de dados página");
+                // str = JSON.stringify(errorThrown, null, 4);
+                // console.log('+++ '+errorThrown.responseText);
+                var saidaErr = _.unescape(errorThrown.responseText); 
+                window.open('about:blank').document.body.innerHTML = saidaErr;
+            } 
+        });
     }
 
     fn._configuraSegmentacoes = function(dados=null){
@@ -616,12 +723,10 @@ var ProdutoVeiculo = (function(){
         // aplica as regras aos períodos existentes
         if(this._listaPeriodos.length > 0){
             for(var i=0; i<this._listaPeriodos.length; i++){
-                // TODO
-                var p = this._listaPeriodos[i];             
+                var p = this._listaPeriodos[i];     
+                p.aplicaRegras(this._formatoAtivo);        
             }
-        }
-        
-        //console.log('formato ATIVO: '+JSON.stringify(frm, null, 4));
+        } //console.log('formato ATIVO: '+JSON.stringify(frm, null, 4));
     }
 
     fn._criarPeriodo = function(dadosPeriodo=null){
@@ -834,8 +939,8 @@ var ProdutoVeiculo = (function(){
         this._$elmCabProdutoInv.empty();
         this._$elmCabProdutoInv.append(formataDado(this._investimentoTotal));
 
-        ////////////////////////////////////////////////
-        // atualiza dados do período
+        // dispara o evento para atualizar dados totais da proposta;
+        document.dispatchEvent(new CustomEvent("eventoAtualizaCabecalhoVeiculo",{ "detail": {'produtoID':this._produtoID} }));
     }
     
 
@@ -850,6 +955,9 @@ var ProdutoVeiculo = (function(){
 
     fn.getID = function(){ return this._produtoID; }
     fn.getGrupo = function(){ return this._grupo; }
+    fn.getDatas = function(){ return {dataInit:this._dataInit, dataFim:this._dataFim}; }
+    fn.getNome = function (){ return this._produtoNome;}
+    fn.getInvestimento = function(){ return this._investimentoTotal; }
 
     fn.getDados = function(){ 
         this._target = this._$elmTarget.val();
@@ -875,16 +983,8 @@ var ProdutoVeiculo = (function(){
         return DADOS;
     }
 
-    fn.getDatas = function(){
-        return {dataInit:this._dataInit, dataFim:this._dataFim};
-    }
-
-    fn.getInvestimento = function(){
-        return this._investimentoTotal;
-    }
-
-    fn.excluirProduto = function(){
-        this._excluiPeriodos();
+    fn.excluirProduto = function(excluiMacro=false){
+        this._excluiPeriodos(false,excluiMacro);
         this._$elementoProduto.remove();
     }
     // expoe construtor
@@ -942,43 +1042,43 @@ var CardVeiculo = (function (){
 
         document.addEventListener('eventoExcluiCard',function (e) {
             if(e.detail.veiculoID == self._veiculoID){
-                self._excluiProdutos();
-                self.excluir();
+                self._carregaExcluiDadosVeiculos(false);
             }
         });
 
-        document.addEventListener('eventoAtualizaCabecalhoVeiculo',function (e) { //console.log('no veiculo evento '+e.detail.produtoID)
-            for(var i=0; i<self._produtosAtivos.length; i++){
-                var p = self._produtosAtivos[i];
+        document.addEventListener('eventoAtualizaCabecalhoVeiculo',function (e) { 
+            // for(var i=0; i<self._produtosAtivos.length; i++){
+            //     var p = self._produtosAtivos[i];
 
-                if(e.detail.produtoID == p.getID()){
-                    // TODO ////////////////////////////
-                }
-            }
+            //     if(e.detail.produtoID == p.getID()){
+            //         // TODO ////////////////////////////
+            //     }
+            // }
             self.atualizaDadosCabecalho();
         })
 
-        this._onDadosCarregados = function(data){
+        this._onDadosCarregadosExcluidos = function(data){
             if(!data.erro){
-    
-                if(data.listaProdutos && data.listaProdutos.length > 0){ console.log('LISTA PRODUTOS >>> ' + JSON.stringify(data.listaProdutos, null, 4));
-                    // renderiza o container do card
-                    self.ativar(); 
+                if(data.excluiVeiculo){
+                    chamaModalFeedback('OPERAÇÃO FINALIZADA!', 'Veículo excluido com sucesso.');
+                    self._excluiProdutos(false,true); // true -> exclui macro
+                    self.excluir();
+                } else {
+                    if(data.listaProdutos && data.listaProdutos.length > 0){ 
+                        //console.log('LISTA PRODUTOS >>> ' + JSON.stringify(data.listaProdutos, null, 4));
+                        // renderiza o container do card
+                        self.ativar(); 
 
-                    // insere novo produto para item do array principal
-                    for(var i=0; i<data.listaProdutos.length; i++){ // 
-                        var P = data.listaProdutos[i];
-                        self._inserirNovoProduto(P);
+                        // insere novo produto para item do array principal
+                        for(var i=0; i<data.listaProdutos.length; i++){ // 
+                            var P = data.listaProdutos[i];
+                            self._inserirNovoProduto(P);
+                        }
                     }
                 }
-                
-    
-                // IMPLEMENTAR CARREGAMENTO DOS DADOS DE PRODUTOS E PERÍODOS
-    
             } else {
-                console.log('erro de carregamento de dados de veículos '+data.erro)
+                chamaModalFeedback('<span style="color:red;">ERRO DE OPERAÇÃO</span>', data.erro);
             }
-            
         }
 
         ////////////////////////////////////////////
@@ -990,16 +1090,17 @@ var CardVeiculo = (function (){
         this._btVeiculo = new BtVeiculo(id,logo,nome,cor,status,escopoBt,baseHTML);
 
         // se tiver status ativo carrega dados 
-        if(status) this._carregaDadosVeiculos();
+        if(status) this._carregaExcluiDadosVeiculos();
     }
 
     var fn = CardVeiculo.prototype;
 
     // métodos privados
-    fn._carregaDadosVeiculos = function(){
+
+    fn._carregaExcluiDadosVeiculos = function(carrega = true){
         var DADOS = {};
-        
-        DADOS.carregaVeiculo = 1;
+        carrega ? DADOS.carregaVeiculo = 1 : DADOS.excluiVeiculo = 1;
+
         DADOS.IDVeiculo      = this._veiculoID;
         DADOS.IDProposta     = IDProposta;
 
@@ -1009,7 +1110,7 @@ var CardVeiculo = (function (){
             url: arqCriaEdita,
             data: DADOS,
             cache: false,
-            success: this._onDadosCarregados,
+            success: this._onDadosCarregadosExcluidos,
             error: function(errorThrown){
                 console.log("Falha no AJAX! -- envio de dados página");
                 // str = JSON.stringify(errorThrown, null, 4);
@@ -1020,26 +1121,37 @@ var CardVeiculo = (function (){
         });
     }
 
-    fn._excluiProdutos = function(idp){
-        var posProduto = -1;
-        
-        for(var i=0; i<this._produtosAtivos.length; i++){
-            var p = this._produtosAtivos[i];
-
-            if(!idp || idp == p.getID()){
-                p.excluirProduto();
-                this._produtosAtivos[i] = p = null;
-                posProduto = i;
+    fn._excluiProdutos = function(idp,excluiMacro=false){
+        if(idp){
+            var posProduto = -1;
+            
+            for(var i=0; i<this._produtosAtivos.length; i++){
+                var p = this._produtosAtivos[i];
+                if(idp == p.getID()) posProduto = i;
             }
-        }
 
-        // remove o produto do array de ativos
-        if(!idp){
-            this._produtosAtivos = [];
+            if(posProduto > -1){
+                var p = this._produtosAtivos[posProduto];
+                var self = this;
+                
+                callModalMenor('CONFIRMA EXCLUIR PRODUTO <strong>'+p.getNome()+'</strong>?', 
+                'Todos os períodos do produto selecionado serão excluidos imediatamente da tela de edição e da base de dados.',
+                function(){
+                    p.excluirProduto();
+                    self._produtosAtivos[posProduto] = p = null;
+                    self._produtosAtivos.splice(posProduto,1);
+                });
+            }
+
         } else {
-            if(posProduto > -1) this._produtosAtivos.splice(posProduto,1);
+            for(var i=0; i<this._produtosAtivos.length; i++){
+                var p = this._produtosAtivos[i];
+                p.excluirProduto(excluiMacro);
+                this._produtosAtivos[i] = p = null;
+            }
+            this._produtosAtivos = [];
         }
-        
+          
         this.atualizaDadosCabecalho();
     }
 
@@ -1052,7 +1164,6 @@ var CardVeiculo = (function (){
     }
 
     fn._inserirNovoProduto = function(pr){
-
        var produto = typeof pr === 'string' ? pr : pr.produto;
 
         // localiza o produto dentro da lista de regras
@@ -1152,7 +1263,7 @@ var CardVeiculo = (function (){
 
 
     // métodos públicos
-   fn.ativar = function (){
+    fn.ativar = function (){
         this._ativo = true;
         this._renderContainerCard();
     }
@@ -1162,7 +1273,7 @@ var CardVeiculo = (function (){
         // this._produtosAtivos
         var dataInit, dataFim, di, df;
         this._investimentoTotal = 0;
-        
+             
         for(var i=0; i<this._produtosAtivos.length; i++){
             var pr = this._produtosAtivos[i];
             var datas = pr.getDatas(); 
@@ -1204,6 +1315,9 @@ var CardVeiculo = (function (){
 
         $('#cab-veiculo-investimento_'+this._veiculoID).empty(); //console.log('invest depois total '+this._investimentoTotal)
         $('#cab-veiculo-investimento_'+this._veiculoID).append(formataDado(this._investimentoTotal));
+
+        // dispara o evento para atualizar dados totais da proposta;
+        document.dispatchEvent(new CustomEvent("eventoAtualizaDadosCabecalhoProposta"));        
     }
     
     
@@ -1240,6 +1354,13 @@ var CardVeiculo = (function (){
         return DADOS;
     }
     
+    fn.getInvestimentoTotal = function(){
+        return this._investimentoTotal;
+    }
+
+    fn.getDatas = function(){
+        return {dataInit:this._dataInit, dataFim:this._dataFim};
+    }
 
     // expoe construtor
     return CardVeiculo;

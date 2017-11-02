@@ -80,15 +80,15 @@ function salvarProposta(){
                 }
             }
         } 
-        console.log(JSON.stringify(DADOS.periodos, null, 4));
+        // console.log(JSON.stringify(DADOS.periodos, null, 4));
     }
-    erro == '' ? gravarDados(DADOS) : chamaModalFeedback('NÃO FOI POSSÍVEL SALVAR A PROPOSTA!',erro);
+    erro == '' ? gravarDados(DADOS) : chamaModalFeedback('<span style="color:red;">NÃO FOI POSSÍVEL SALVAR A PROPOSTA!</span>',erro);
 }
 
 function excluirProposta(){
     // TODO ///////////////////
     if(IDProposta == 0){
-        chamaModalFeedback('OPERAÇÃO NÃO EXECUTADA!','Não foi possíel excluir esta proposta porque ela ainda não foi salva no sistema.');
+        chamaModalFeedback('<span style="color:red;">OPERAÇÃO NÃO EXECUTADA!</span>','Não foi possíel excluir esta proposta porque ela ainda não foi salva no sistema.');
     } else {
         var DADOS = {};
         DADOS.IDProposta = IDProposta;
@@ -147,30 +147,89 @@ function onDadosSalvos(data){ //console.log('>>>>> '+JSON.stringify(data, null, 
         var op;
         if(data.operacao == CRIAR){
             IDProposta = data.IDProposta;
-            op = ' criada ';
+            callModalMenor('PROPOSTAS ALRIGHT!','Proposta <strong>'+$('#proposta-titulo').val()+'</strong> ('+IDProposta+') criada com sucesso!',
+                function(){window.location.href = __BASESITE__+"/edita-proposta/"+IDProposta;}
+            );
+
         } else if(data.operacao == EXCLUIR){
             // se a proposta foi excluida redireciona para a página de listagem
-            window.location.href = "../lista-propostas";
+            window.location.href = __BASESITE__+"/lista-propostas";
         } else { // ATUALIZAR
             // retornod e novos períodos salvos
             if(data.periodos) document.dispatchEvent(new CustomEvent("eventoFeedbackSalvarPeriodos",{ "detail": {'periodosSalvos':data.periodos} }));
-            op = ' atualizada ';
+
+            var msg = 'Proposta <strong>'+$('#proposta-titulo').val()+'</strong> ('+IDProposta+') atualizada com sucesso!';
+            if(data.erro_periodos) msg += '<br><strong>-- '+data.erro_periodos+'--</strong>';
+            chamaModalFeedback('PROPOSTAS ALRIGHT!', msg);
         }
-
-        var msg = 'Proposta <strong>'+$('#proposta-titulo').val()+'</strong> ('+IDProposta+') '+op+'com sucesso!';
-        if(data.erro_periodos) msg += '<br><strong>-- '+data.erro_periodos+'--</strong>';
-
-        chamaModalFeedback('PROPOSTAS ALRIGHT!', msg);
     } else { // se tiver erro
         chamaModalFeedback('<span style="color:red;">ERRO DE OPERAÇÃO</span>', data.erro);
     }
 }
 
 
-
-
 function msgErrProp(idp){
     callModalMenor('PROPOSTA NÃO ENCONTRADA!','A proposta '+idp+' não foi localizada no sistema!',
-        function(){window.location.href = "../edita-proposta";}
+        function(){window.location.href = __BASESITE__+"/edita-proposta";}
     );
+}
+
+var propostaDataInit = '';
+var propostaDataFim  = '';
+
+$(document).ready(function() {
+    document.addEventListener('eventoAtualizaDadosCabecalhoProposta',function (e) { 
+        var total   = 0;
+        var periodo = '---';
+        var umAtivo = false;
+
+        $('#periodo-proposta').empty();
+        $('#valor-total-proposta').empty();
+
+        if(VEICULOS.length>0){
+            for(var i=0; i<VEICULOS.length; i++){
+                var v = VEICULOS[i];
+                
+                if(v.getAtivo()){ 
+                    umAtivo = true;
+                    
+                    // compara datas
+                    var datas = v.getDatas();
+
+                    if(datas.dataInit != '--' && datas.dataFim != '--'){
+                        if(propostaDataInit == ''){
+                            propostaDataInit = datas.dataInit;
+                            propostaDataFim  = datas.dataFim;
+                        } else { //console.log(v.getNome()+' -- dataInit: '+datas.dataInit+' | dataFim: '+datas.dataFim);
+                            if(comparaDatas(datas.dataInit,propostaDataInit,'<')) propostaDataInit = datas.dataInit;
+                            if(comparaDatas(datas.dataFim,propostaDataFim,'>')) propostaDataFim = datas.dataFim;
+                        }
+                    }
+                    
+                   
+
+                    // soma valores
+                    total += parseFloat(v.getInvestimentoTotal());
+                }
+            } 
+            if(umAtivo) periodo = 'De '+propostaDataInit+' a &nbsp;'+propostaDataFim;
+        }
+        // renderiza resultados
+        $('#periodo-proposta').append(periodo);
+        $('#valor-total-proposta').append(formataDado(total));
+    })
+});
+
+function comparaDatas(da,db,regra = '>'){
+    var d1 = da.split('/');
+    var d2 = db.split('/');
+    var D1 = parseInt(d1[2]+d1[1]+d1[0]);
+    var D2 = parseInt(d2[2]+d2[1]+d2[0]);
+
+    if(regra  == '>'  && D1>D2)  return true;
+    if(regra  == '<'  && D1<D2)  return true;
+    if(regra  == '>=' && D1>=D2) return true;
+    if(regra  == '<=' && D1<=D2) return true;
+    if((regra == '='  || regra == '==') && D1==D2) return true;
+    return false
 }

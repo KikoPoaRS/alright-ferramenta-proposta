@@ -49,7 +49,6 @@ if(isset($_POST['IDProposta'])){
                     ////////////////////////////////////////////
 
                     // salva/atualiza dados dos períodos
-                    // TODO
                     if(isset($_POST['periodos']) && count($_POST['periodos'])>0){
                         $pSalvos = array();
 
@@ -109,7 +108,7 @@ if(isset($_POST['IDProposta'])){
 
             if($PROPOSTA){
                 // exclui dados dos perídos
-                // TODO
+                propostas_periodo::delete_all(array('conditions'=>array('propostas_id = ?',$_POST['IDProposta'])));
 
                 // exclui dados do cabecalho da proposta
                 ////////////////////////////////////////////
@@ -118,18 +117,41 @@ if(isset($_POST['IDProposta'])){
             } else {
                 $saida['erro'] = $erros['naoexiste'];
             }
-
-
         }
 
     } else if(isset($_POST['excluiPeriodo'])) {
-        // TODO
+        $PERIODO = propostas_periodo::find_by_id_and_propostas_id($_POST['IDperiodo'],$_POST['IDProposta']);
+
+        if($PERIODO){
+            $PERIODO->delete();
+            $saida['excluiPeriodo'] = 1;
+            $saida['IDinterno'] = $_POST['IDinterno'];
+        } else {
+            $saida['erro'] = $erros['naoexiste'];
+        }
 
     } else if(isset($_POST['excluiProduto'])) {
-        // TODO
+        $criterios = array('propostas_id = ? AND veiculos_regras_id = ? AND grupo = ?',$_POST['IDProposta'],$_POST['IDRegra'],$_POST['grupo']);
+        $produto  = propostas_periodo::all(array('conditions'=>$criterios));
+
+        if(count($produto)>0){
+            propostas_periodo::delete_all(array('conditions'=>$criterios));
+            $saida['excluiProduto'] = 1;
+        } else {
+            $saida['erro'] = 'O registro deste produto não foi encontrado no banco';
+        }
 
     } else if(isset($_POST['excluiVeiculo'])) {
-        // TODO
+        // IDVeiculo
+        $criterios = array('propostas_id = ? AND veiculos_id = ?',$_POST['IDProposta'],$_POST['IDVeiculo']);
+        $veiculo  = propostas_periodo::all(array('conditions'=>$criterios));
+
+        if(count($veiculo)>0){
+            propostas_periodo::delete_all(array('conditions'=>$criterios));
+            $saida['excluiVeiculo'] = 1;
+        } else {
+            $saida['erro'] = 'O registro deste veíuclo não foi encontrado no banco';
+        }
 
     } else if(isset($_POST['carregaVeiculo'])) {
         if(isset($_POST['IDVeiculo']) && isset($_POST['IDProposta'])){
@@ -153,8 +175,6 @@ if(isset($_POST['IDProposta'])){
                     ++$contaPeridos;
 
                     if(count($arrProdutos) == 0 && count($arrPeriodos) == 0){
-                        // $regraAnterior = $per->veiculos_regras_id;
-                        // $grupoAnterior = $per->grupo;
                         array_push($arrPeriodos,montaDadosPeriodo($per));
                     } else {
                         if($grupoAnterior == $per->grupo){
@@ -242,8 +262,8 @@ function montaDadosPeriodo($p){
 
     $d['dataInit']   = date_format($p->data_inicio, 'd/m/Y');
     $d['dataFim']    = date_format($p->data_fim, 'd/m/Y');
-    $d['totLiquido'] = $p->total_bruto;
-    $d['totBruto']   = $p->total_liquido;
+    $d['totLiquido'] = $p->total_liquido;
+    $d['totBruto']   = $p->total_bruto;
     $d['desconto']   = $p->desconto_linha;
 
     return $d;
