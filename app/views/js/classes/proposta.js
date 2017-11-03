@@ -1020,10 +1020,7 @@ var CardVeiculo = (function (){
         this._investimentoTotal  = 0;
 
         // referencias a componentes html
-        this._$escopoGeral       = $(escopo);
-        // this._$elmPeriodo           = null;
-        // this._$elmInvestimentoTotal = null;
-        // this._$elmTotalProdutos     = null;
+        this._$escopoGeral = $(escopo);
 
         ///////////////////////////////////////////
         // EVENTOS ////////////////////////////////
@@ -1047,13 +1044,6 @@ var CardVeiculo = (function (){
         });
 
         document.addEventListener('eventoAtualizaCabecalhoVeiculo',function (e) { 
-            // for(var i=0; i<self._produtosAtivos.length; i++){
-            //     var p = self._produtosAtivos[i];
-
-            //     if(e.detail.produtoID == p.getID()){
-            //         // TODO ////////////////////////////
-            //     }
-            // }
             self.atualizaDadosCabecalho();
         })
 
@@ -1212,7 +1202,7 @@ var CardVeiculo = (function (){
         for(var i=0; i<this._selectProdutos.length; i++){ listaPs += '<option value="'+this._selectProdutos[i]+'">'+this._selectProdutos[i]+'</option>'; }
 
         var containerCard = `
-        <div id="painel-x-card_${this._veiculoID}" class="x_panel" style="border-left: 3px solid ${this._veiculoCor};">
+        <div id="painel-x-card_${this._veiculoID}" class="x_panel" style="margin-top:20px; border-left: 3px solid ${this._veiculoCor};">
             <div class="x_title">
                 <img class="logo-ico-veiculo" src="${this._baseHtml}imgs/${this._veiculoLogo.ativo}">
                 <h2>${this._veiculoNome} (&nbsp<span id="cab-veiculo-contagem_${this._veiculoID}" style="color:inherit; margin: 0 -2px 0 -2px;">0</span>&nbsp)</h2>

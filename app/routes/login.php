@@ -18,7 +18,8 @@ $app->get('/', function() use($app){
 
 $app->post('/', function() use ($app) {
 	if(isset($_SESSION['logadoproposta'])){
-		$app->redirect($app->urlFor('lista-propostas'));
+		// $app->redirect($app->urlFor('lista-propostas'));
+		redir('lista-propostas');
 	} else {
 		$request = $app->request();
 		$usuario = usuario::find_by_senha($request->post('toolpass'));
@@ -48,12 +49,12 @@ $app->get('/fechasessao', function() use($app){
 
 
 
-function redir($url=''){
-	echo'
-	<script>
-	window.location.href = "./'.$url.'";
-	</script>
-	';
-}
+// function redir($url=''){
+// 	echo'
+// 	<script>
+// 	window.location.href = "./'.$url.'";
+// 	</script>
+// 	';
+// }
 
  ?>

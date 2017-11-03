@@ -119,6 +119,9 @@ if(isset($_POST['IDProposta'])){
             }
         }
 
+
+        
+
     } else if(isset($_POST['excluiPeriodo'])) {
         $PERIODO = propostas_periodo::find_by_id_and_propostas_id($_POST['IDperiodo'],$_POST['IDProposta']);
 
@@ -129,6 +132,9 @@ if(isset($_POST['IDProposta'])){
         } else {
             $saida['erro'] = $erros['naoexiste'];
         }
+
+
+
 
     } else if(isset($_POST['excluiProduto'])) {
         $criterios = array('propostas_id = ? AND veiculos_regras_id = ? AND grupo = ?',$_POST['IDProposta'],$_POST['IDRegra'],$_POST['grupo']);
@@ -141,6 +147,9 @@ if(isset($_POST['IDProposta'])){
             $saida['erro'] = 'O registro deste produto não foi encontrado no banco';
         }
 
+
+
+
     } else if(isset($_POST['excluiVeiculo'])) {
         // IDVeiculo
         $criterios = array('propostas_id = ? AND veiculos_id = ?',$_POST['IDProposta'],$_POST['IDVeiculo']);
@@ -152,6 +161,9 @@ if(isset($_POST['IDProposta'])){
         } else {
             $saida['erro'] = 'O registro deste veíuclo não foi encontrado no banco';
         }
+
+
+
 
     } else if(isset($_POST['carregaVeiculo'])) {
         if(isset($_POST['IDVeiculo']) && isset($_POST['IDProposta'])){

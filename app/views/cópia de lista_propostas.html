@@ -23,13 +23,14 @@
 
 {% block conteudo %}
 
+
 <div class="Grid page-title">
     <div class="Grid-cell title_left">
         <h4>Propostas <i class="fa fa-arrow-right setatitulo"></i> Listagem de propostas</h4>
     </div> 
     <div class="Grid container-thumb-veiculos">
-        {% for VEICULO in listaVeiculos %}
-        <div class="thumbs-veiculos"><img src="{{ __BASEHTML__ }}imgs/{{VEICULO.thumb}}" data-toggle="tooltip" data-placement="top" title="{{VEICULO.nome}}"></div>
+        {% for veiculo in listaVeiculos %}
+        <div class="thumbs-veiculos"><img src="{{ __BASEHTML__ }}imgs/{{veiculo.thumb}}" data-toggle="tooltip" data-placement="top" title="{{veiculo.nome}}"></div>
         {% endfor %}
     </div>
 </div>
@@ -55,13 +56,12 @@
                 </ul> -->
                 <div class="clearfix"></div>
             </div>
-
             <div class="x_content">
                 <table id="tabela-veiculos" class="table table-striped table-bordered">
                     <thead>
                       <tr>
                         <th style="width:34px">Criada</th>
-                        <th>Atualizada</th>
+                        <th style="width:64px">Atualizada</th>
                         <th>Cliente</th>
                         <th>Investimento</th>
                         <th>Período</th>
@@ -71,24 +71,73 @@
                     </thead>
 
                     <tbody>
-                        {% for PROPOSTA in listaPropostas %}
+
+                        {% for i in 0..30 %}
                         <tr>
-                            <td>{{PROPOSTA.criada}}</td>
-                            <td>{{PROPOSTA.atualizada}}</td>
-                            <td>{{PROPOSTA.cliente|raw}}</td>
-                            <td>R$ {{PROPOSTA.investimento}}</td>
-                            <td>{{PROPOSTA.periodo}}</td>
-                            <td>{{PROPOSTA.veiculos|raw}}</td>
+                            <td>10/10/17</td>
+                            <td>11/10/17 - 10:25</td>
+                            <td><strong>Unisinos</strong> - Campanha de verão </td>
+                            <td>R$ 1.200.000,00</td>
+                            <td>20/10/17 - 30/11/17</td>
+                            <td>
+                                <div class="Grid container-veiculos-tabela">
+                                    <div class="box-veiculo-tabela" style="background-color:#e92e31" data-toggle="tooltip" data-placement="top" title="SmartClip"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#5849aa" data-toggle="tooltip" data-placement="top" title="Alright"></div>
+                                </div>
+                            </td>
                             <td style="padding: 6px 5px; text-align:center;">
-                                <button type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Editar proposta" onclick="carregaProposta({{PROPOSTA.id}})"><i class="fa fa-edit"></i></button>
+                                <button type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Editar proposta"><i class="fa fa-edit"></i></button>
+                                <!-- <button type="button" class="btn btn-round btn-warning bt-acoes"><i class="fa fa-folder-o"></i></button> -->
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>10/10/17</td>
+                            <td>11/10/17 - 10:25</td>
+                            <td><strong>Ipiranga</strong> - Férias com tudo em cima </td>
+                            <td>R$ 800.000,00</td>
+                            <td>20/10/17 - 30/11/17</td>
+                            <td>
+                                <div class="Grid container-veiculos-tabela">
+                                    <div class="box-veiculo-tabela" style="background-color:#546eff" data-toggle="tooltip" data-placement="top" title="Google"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#e92e31" data-toggle="tooltip" data-placement="top" title="SmartClip"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#f7d244" data-toggle="tooltip" data-placement="top" title="Buscapé"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#3d5590" data-toggle="tooltip" data-placement="top" title="Facebook"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#aacb30" data-toggle="tooltip" data-placement="top" title="Tradelab"></div>
+                                </div>
+                            </td>
+                            <td style="padding: 6px 5px; text-align:center;">
+                                <button type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Editar proposta"><i class="fa fa-edit"></i></button>
+                                <!-- <button type="button" class="btn btn-round btn-warning bt-acoes"><i class="fa fa-folder-o"></i></button> -->
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>10/10/17</td>
+                            <td>11/10/17 - 10:25</td>
+                            <td><strong>Zaffari</strong> - Festival do perú</td>
+                            <td>R$ 96.500,00</td>
+                            <td>20/10/17 - 30/11/17</td>
+                            <td>
+                                <div class="Grid container-veiculos-tabela">
+                                    <div class="box-veiculo-tabela" style="background-color:#f7d244" data-toggle="tooltip" data-placement="top" title="Buscapé"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#3d5590" data-toggle="tooltip" data-placement="top" title="Facebook"></div>
+                                    <div class="box-veiculo-tabela" style="background-color:#aacb30" data-toggle="tooltip" data-placement="top" title="Tradelab"></div>
+                                </div>
+                            </td>
+                            <td style="padding: 6px 5px; text-align:center;">
+                                <button type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Editar proposta"><i class="fa fa-edit"></i></button>
                                 <!-- <button type="button" class="btn btn-round btn-warning bt-acoes"><i class="fa fa-folder-o"></i></button> -->
                             </td>
                         </tr>
                         {% endfor %}
+
                     </tbody>
                   </table>
             </div>
         </div>
+
+
         {% include "modal-menor.html" %}
 
     </div>
@@ -98,14 +147,6 @@
 {% endblock %}
 
 {% block scriptsjs %}
-
-    <script>
-        var dataInit = '{{dataInit}}';    
-        var dataFim  = '{{dataFim}}';   
-        
-        console.log('datas de entrada: '+dataInit+' e '+dataFim);
-    </script>
-    
     <script src="{{ __BASEHTML__ }}vendors/ion.rangeSlider/js/ion.rangeSlider.min.js"></script>
     <script src="{{ __BASEHTML__ }}vendors/jquery-mask/jquery.mask.min.js"></script>
 
@@ -130,6 +171,5 @@
     <script src="{{ __BASEHTML__ }}vendors/bootstrap-daterangepicker/daterangepicker.js"></script>
 
     <script src="{{ __BASEHTML__ }}js/secoes/componentes_lista_propostas.js?{{random()}}"></script>
-    <script src="{{ __BASEHTML__ }}js/secoes/lista_propostas.js?{{random()}}"></script>
 
 {% endblock %}

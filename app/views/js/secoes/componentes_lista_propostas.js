@@ -1,22 +1,19 @@
-function init_daterangepicker_reservation() {
-    
+function init_daterangepicker_reservation() {  
     if( typeof ($.fn.daterangepicker) === 'undefined'){ return; }
       // console.log('init_daterangepicker_reservation');
-    var di = new Date(new Date().setDate(new Date().getDate() - 30));
-    var df = new Date();
+    // var di = new Date(new Date().setDate(new Date().getDate() - 30));
+    // var df = new Date();
 
-    var dd_di = di.getDate();
-    var mm_di = di.getMonth() + 1;
-    var aa_di = di.getFullYear();
+    // var dd_di = di.getDate();
+    // var mm_di = di.getMonth() + 1;
+    // var aa_di = di.getFullYear();
     
-    var dd_df = df.getDate();
-    var mm_df = df.getMonth() + 1;
-    var aa_df = df.getFullYear();
+    // var dd_df = df.getDate();
+    // var mm_df = df.getMonth() + 1;
+    // var aa_df = df.getFullYear();
 
-   
-
-    var dataInit = dd_di+'/'+(mm_di < 10?'0'+mm_di:mm_di)+'/'+aa_di;
-    var dataFim  = dd_df+'/'+(mm_df < 10?'0'+mm_df:mm_df)+'/'+aa_df;
+    // var dataInit = dd_di+'/'+(mm_di < 10?'0'+mm_di:mm_di)+'/'+aa_di;
+    // var dataFim  = dd_df+'/'+(mm_df < 10?'0'+mm_df:mm_df)+'/'+aa_df;
 
     $('#periodoListaPropostas').daterangepicker(
         {
@@ -55,6 +52,19 @@ function init_daterangepicker_reservation() {
         // console.log(start.toISOString(), end.toISOString(), label);
     });
 
+    $('#periodoListaPropostas').on('apply.daterangepicker', function(ev, picker) {
+
+        var init = picker.startDate.format('DD/MM/YYYY');
+        var fim  = picker.endDate.format('DD/MM/YYYY');
+        // window.location.href = __BASESITE__+"/lista-propostas/"+init+'_'+fim;
+// console.log('ENVIANDO.... '+init+' e '+fim);
+        var $form =  $('<form action="'+__BASESITE__+'/lista-propostas" method="POST">' + 
+        '<input type="hidden" name="dataInit" value="' + init + '">' +
+        '<input type="hidden" name="dataFim" value="' + fim + '">' +
+        '</form>');
+        $(document.body).append($form);
+        $form.submit();
+    });
   }
 
 $(document).ready(function() {    
