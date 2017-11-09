@@ -2,85 +2,94 @@
 
 
 $app->get('/edita-proposta(/:idp)', function($idp=0) use($app){
-	$area = 'lista-propostas';
 
-	$selectAgencias = '<option>---</option>';
-	$selectClientes = '<option>---</option>';
-	$listaVeiculos  = array();
+	if(isset($_SESSION['logadoproposta'])){
+		$area = 'lista-propostas';
 
-	$IDProposta = $idp;
-	$MsgErro    = '';
-	$tituloProposta   = '';
-	$agenciaProposta  = 0;
-	$clienteProposta  = 0;
-	$contatoProposta  = '';
-	$descontoProposta = '';
+		$selectAgencias = '<option>---</option>';
+		$selectClientes = '<option>---</option>';
+		$listaVeiculos  = array();
 
-	$agencias = agencia::all();
-	$clientes = cliente::all();
-	$veiculos = veiculo::all();
+		$IDProposta = $idp;
+		$MsgErro    = '';
+		$tituloProposta   = '';
+		$agenciaProposta  = 0;
+		$clienteProposta  = 0;
+		$contatoProposta  = '';
+		$descontoProposta = '';
 
-	if($idp != 0){
-		$proposta = proposta::find_by_id($idp);
+		$agencias = agencia::all();
+		$clientes = cliente::all();
+		$veiculos = veiculo::all();
 
-		if($proposta){
-			$tituloProposta   = $proposta->titulo;
-			$agenciaProposta  = $proposta->agencia_id;
-			$clienteProposta  = $proposta->cliente_id;
-			$contatoProposta  = $proposta->contato;
-			$descontoProposta = $proposta->desconto_cliente;
-		} else {
-			$IDProposta = 0;
-			$MsgErro = 'msgErrProp('.$idp.');';
-		}
-	}
+		if($idp != 0){
+			$proposta = proposta::find_by_id($idp);
 
-
-	if(count($agencias)>0){
-		foreach($agencias as $it){
-			$selected = ($it->id == $agenciaProposta) ? 'selected' : '';
-			$selectAgencias .= '<option value="'.$it->id.'" '.$selected.'>'.$it->nome.'</option>';
-		}
-	}
-
-
-	if(count($clientes)>0){
-		foreach($clientes as $it){
-			$selected = ($it->id == $clienteProposta) ? 'selected' : '';
-			$selectClientes .= '<option value="'.$it->id.'" '.$selected.'>'.$it->nome.'</option>';
-		}
-	}
-
-	if(count($veiculos)>0){
-		foreach($veiculos as $v){
-			$dados = array();
-			$dados['regras'] = pegaRegrasVeiculo($v->id);
-
-			if($dados['regras']){
-				$dados['id']           = $v->id;
-				$dados['logo_ativo']   = $v->img_logo_ativo;
-				$dados['logo_inativo'] = $v->img_logo_inativo;
-				$dados['nome']         = $v->nome;
-				$dados['cor']          = $v->cor;
-
-				$regraAtiva = null;
-				if($idp != 0) $regraAtiva = propostas_periodo::find_by_propostas_id_and_veiculos_id($idp,$v->id);
-				$dados['status'] = $regraAtiva ? 1 : 0;
-
-				array_push($listaVeiculos,$dados);
+			if($proposta){
+				$tituloProposta   = $proposta->titulo;
+				$agenciaProposta  = $proposta->agencia_id;
+				$clienteProposta  = $proposta->cliente_id;
+				$contatoProposta  = $proposta->contato;
+				$descontoProposta = $proposta->desconto_cliente;
+			} else {
+				$IDProposta = 0;
+				$MsgErro = 'msgErrProp('.$idp.');';
 			}
 		}
+
+
+		if(count($agencias)>0){
+			foreach($agencias as $it){
+				$selected = ($it->id == $agenciaProposta) ? 'selected' : '';
+				$selectAgencias .= '<option value="'.$it->id.'" '.$selected.'>'.$it->nome.'</option>';
+			}
+		}
+
+
+		if(count($clientes)>0){
+			foreach($clientes as $it){
+				$selected = ($it->id == $clienteProposta) ? 'selected' : '';
+				$selectClientes .= '<option value="'.$it->id.'" '.$selected.'>'.$it->nome.'</option>';
+			}
+		}
+
+		if(count($veiculos)>0){
+			foreach($veiculos as $v){
+				$dados = array();
+				$dados['regras'] = pegaRegrasVeiculo($v->id);
+
+				if($dados['regras']){
+					$dados['id']           = $v->id;
+					$dados['logo_ativo']   = $v->img_logo_ativo;
+					$dados['logo_inativo'] = $v->img_logo_inativo;
+					$dados['nome']         = $v->nome;
+					$dados['cor']          = $v->cor;
+
+					$regraAtiva = null;
+					if($idp != 0) $regraAtiva = propostas_periodo::find_by_propostas_id_and_veiculos_id($idp,$v->id);
+					$dados['status'] = $regraAtiva ? 1 : 0;
+
+					array_push($listaVeiculos,$dados);
+				}
+			}
+		}
+
+		$app->render('cria_edita_propostas.html',['area'             => $area, 
+												'listaVeiculos'    => $listaVeiculos, 
+												'IDProposta'       => $IDProposta, 
+												'selectAgencias'   => $selectAgencias,
+												'selectClientes'   => $selectClientes,
+												'tituloProposta'   => $tituloProposta,
+												'contatoProposta'  => $contatoProposta,
+												'descontoProposta' => $descontoProposta,
+												'MsgErro'          => $MsgErro ]);
+	} else {
+
+		$n = $idp==0 ? '': '.';
+		redir('',$n);
 	}
 
-	$app->render('cria_edita_propostas.html',['area'             => $area, 
-											  'listaVeiculos'    => $listaVeiculos, 
-											  'IDProposta'       => $IDProposta, 
-											  'selectAgencias'   => $selectAgencias,
-											  'selectClientes'   => $selectClientes,
-											  'tituloProposta'   => $tituloProposta,
-											  'contatoProposta'  => $contatoProposta,
-											  'descontoProposta' => $descontoProposta,
-											  'MsgErro'          => $MsgErro ]);
+	
 })->name('edita-proposta'); 
 
 

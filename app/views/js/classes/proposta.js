@@ -1212,7 +1212,7 @@ var CardVeiculo = (function (){
                 </ul>
 
                 <div class="resumo-veiculo">
-                    <div style="display:inline-block" id="cab-veiculo-periodo_${this._veiculoID}">De 10/10/17 a 10/11/17</div>
+                    <div style="display:inline-block" id="cab-veiculo-periodo_${this._veiculoID}">De --- a ---</div>
                     <div style="display:inline-block" > &nbsp | &nbsp  Investimento total: R$ <span id="cab-veiculo-investimento_${this._veiculoID}" style="font-weight:600; color:#738cb9">0,00</span></div>
                     <div style="display:inline-block; margin-left:5px;">
                         <select class="form-control select-menor" id="select-veic_${this._veiculoID}">${listaPs}</select>

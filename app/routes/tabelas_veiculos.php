@@ -2,64 +2,68 @@
 
 
 $app->get('/tabelas-veiculos', function() use($app){
+	if(isset($_SESSION['logadoproposta'])){
+		$area = 'tabelas-veiculos';
+		
+		$listaTiposCompras  = array();
+		$listaVeiculos      = array();
+		$listaTiposCompras  = array();
+		$listaClientes      = array();
+		$listaAgencias      = array();
 
-	$area = 'tabelas-veiculos';
-	
-	$listaTiposCompras  = array();
-	$listaVeiculos      = array();
-	$listaTiposCompras  = array();
-	$listaClientes      = array();
-	$listaAgencias      = array();
+		$selectsCompras = '';
 
-	$selectsCompras = '';
+		$tiposCompras = tipos_compra::all();
+		if(count($tiposCompras)>0){
+			foreach($tiposCompras as $tc){
+				$tipo = array();
+				$tipo['nome'] = $tc->nome;
+				$tipo['multiplicador'] = $tc->multiplicador;
+				array_push($listaTiposCompras,$tipo);
+			}
 
-	$tiposCompras = tipos_compra::all();
-	if(count($tiposCompras)>0){
-		foreach($tiposCompras as $tc){
-			$tipo = array();
-			$tipo['nome'] = $tc->nome;
-			$tipo['multiplicador'] = $tc->multiplicador;
-			array_push($listaTiposCompras,$tipo);
+			$selectsCompras = montaSelectCompras($listaTiposCompras);
 		}
 
-		$selectsCompras = montaSelectCompras($listaTiposCompras);
-	}
+		$veiculos = veiculo::all();
+		if(count($veiculos)>0){
+			foreach($veiculos as $v){
+				$veic_produtos     = veiculos_produto::find_by_veiculos_id($v->id);
+				$veic_segmentacoes = veiculos_segmentacoe::find_by_veiculos_id($v->id);
+				$veic_formatos     = veiculos_formato::find_by_veiculos_id($v->id);
+				$veic_regras       = veiculos_regra::find_all_by_veiculos_id($v->id);
 
-	$veiculos = veiculo::all();
-	if(count($veiculos)>0){
-		foreach($veiculos as $v){
-			$veic_produtos     = veiculos_produto::find_by_veiculos_id($v->id);
-			$veic_segmentacoes = veiculos_segmentacoe::find_by_veiculos_id($v->id);
-			$veic_formatos     = veiculos_formato::find_by_veiculos_id($v->id);
-			$veic_regras       = veiculos_regra::find_all_by_veiculos_id($v->id);
+				$arrv = array();
 
-			$arrv = array();
+				$arrv['id']           = $v->id;
+				$arrv['nome']         = $v->nome;
+				$arrv['imagem']       = $v->img_logo_ativo;
+				$arrv['cor']          = $v->cor;
 
-			$arrv['id']           = $v->id;
-			$arrv['nome']         = $v->nome;
-			$arrv['imagem']       = $v->img_logo_ativo;
-			$arrv['cor']          = $v->cor;
+				$arrv['produtos']     = $veic_produtos ? montaSelects($veic_produtos->produtos) : '<option>Item sem registro</option>';
+				$arrv['segmentacoes'] = $veic_segmentacoes ? montaSelects($veic_segmentacoes->segmentacoes) : '<option>Item sem registro</option>';
+				$arrv['formatos']     = $veic_formatos ? montaSelects($veic_formatos->formatos) : '<option>Item sem registro</option>';
+				// $arrv['compras']      = $listaTiposCompras ? montaSelectCompras($listaTiposCompras) : '<option>Item sem registro</option>';
 
-			$arrv['produtos']     = $veic_produtos ? montaSelects($veic_produtos->produtos) : '<option>Item sem registro</option>';
-			$arrv['segmentacoes'] = $veic_segmentacoes ? montaSelects($veic_segmentacoes->segmentacoes) : '<option>Item sem registro</option>';
-			$arrv['formatos']     = $veic_formatos ? montaSelects($veic_formatos->formatos) : '<option>Item sem registro</option>';
-			// $arrv['compras']      = $listaTiposCompras ? montaSelectCompras($listaTiposCompras) : '<option>Item sem registro</option>';
+				$arrv['listaRegras']  = count($veic_regras)>0 ? montaListaRegras($veic_regras, 
+																				$veic_produtos->produtos, 
+																				$veic_segmentacoes->segmentacoes, 
+																				$veic_formatos->formatos,
+																				$listaTiposCompras) : null;
 
-			$arrv['listaRegras']  = count($veic_regras)>0 ? montaListaRegras($veic_regras, 
-																			 $veic_produtos->produtos, 
-																			 $veic_segmentacoes->segmentacoes, 
-																			 $veic_formatos->formatos,
-																			 $listaTiposCompras) : null;
+				array_push($listaVeiculos,$arrv);
 
-			array_push($listaVeiculos,$arrv);
-
-			// echo $v->id.' : '.$v->nome.'<br>';
-			// echo 'REGRAS:<br>*************<br>';
-			// echo '<pre>';print_r($arrv['listaRegras']);echo'</pre><br><br>';
+				// echo $v->id.' : '.$v->nome.'<br>';
+				// echo 'REGRAS:<br>*************<br>';
+				// echo '<pre>';print_r($arrv['listaRegras']);echo'</pre><br><br>';
+			}
 		}
+		
+		$app->render('tabelas_veiculos.html',['area'=>$area, 'listaVeiculos'=>$listaVeiculos, 'selectsCompras'=>$selectsCompras]);
+
+	} else {
+		redir();
 	}
-	
-	$app->render('tabelas_veiculos.html',['area'=>$area, 'listaVeiculos'=>$listaVeiculos, 'selectsCompras'=>$selectsCompras]);
 	
 })->name('tabelas-veiculos'); 
 

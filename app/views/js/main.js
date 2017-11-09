@@ -291,7 +291,7 @@ function formataDado (dado, formato = 'R$', reverse = false){
                             
                             if(++conta == 3){
                                 conta = 0;
-                                final = sm+final;
+                               if(i>0) final = sm+final;
                             }
                         }
                         pre = final;

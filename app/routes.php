@@ -6,10 +6,10 @@ require 'routes/cria_edita_propostas.php';
 require 'routes/infos_base.php';
 require 'routes/tabelas_veiculos.php';
 
-function redir($url=''){
+function redir($url='',$n=''){
 	echo'
 	<script>
-	window.location.href = "./'.$url.'";
+	window.location.href = "'.$n.'./'.$url.'";
 	</script>
 	';
 }

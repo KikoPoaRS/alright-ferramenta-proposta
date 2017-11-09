@@ -206,8 +206,6 @@ $(document).ready(function() {
                         }
                     }
                     
-                   
-
                     // soma valores
                     total += parseFloat(v.getInvestimentoTotal());
                 }
@@ -216,7 +214,7 @@ $(document).ready(function() {
         }
         // renderiza resultados
         $('#periodo-proposta').append(periodo);
-        $('#valor-total-proposta').append(formataDado(total));
+        $('#valor-total-proposta').append(formataDado(total.toFixed(2)));
     })
 });
 
