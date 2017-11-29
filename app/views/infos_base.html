@@ -224,10 +224,10 @@
                                     <span style="font-weight: 600;">{{veiculo.nome}}</span>
                                 </div>
                             </td>
-                            <td><input type="text" id="{{tabela.itemId}}-veiculo-{{ veiculo.id }}" class="form-control" value="{% if tabela.itemId == 'PRODUTO' %}{{veiculo.produtos}}{% elseif tabela.tipo == 'SEGMENTO' %}{{veiculo.segmentacoes}}{% else  %}{{veiculo.formatos}}{% endif %}"></td>
+                            <td><input type="text" id="{{tabela.itemId}}-veiculo-{{ veiculo.id }}" class="form-control" value="{% if tabela.itemId == 'PRODUTO' %}{{veiculo.produtos}}{% elseif tabela.itemId == 'SEGMENTO' %}{{veiculo.segmentacoes}}{% else %}{{veiculo.formatos}}{% endif %}"></td>
                             <td>
                                 <div style="padding: 4px 0; text-align:center;">
-                                    <button onclick="salvarDadosVeiculo('{% if tabela.itemId == 'PRODUTO' %}produtos{% elseif tabela.tipo == 'SEGMENTO' %}segmentacoes{% else  %}formatos{% endif %}',{{ veiculo.id }},'{{veiculo.nome}}', '{{tabela.itemId}}')" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Atualizar registro"><i class="fa fa-save"></i></button>
+                                    <button onclick="salvarDadosVeiculo('{% if tabela.itemId == 'PRODUTO' %}produtos{% elseif tabela.itemId == 'SEGMENTO' %}segmentacoes{% else  %}formatos{% endif %}',{{ veiculo.id }},'{{veiculo.nome}}', '{{tabela.itemId}}')" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Atualizar registro"><i class="fa fa-save"></i></button>
                                 </div>
                             </td>
                         </tr>

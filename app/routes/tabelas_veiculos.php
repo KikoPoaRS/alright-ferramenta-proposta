@@ -102,9 +102,9 @@ function montaSelectCompras($arr,$nomeAtual=null,$valorAtual=null){
 		$valor = $it['multiplicador'];
 		$selected =  '';
 
-		if($nome == $nomeAtual){ $selected = 'selected'; $achou = true; }
+		if($nome == $nomeAtual){ $selected = ' selected'; $achou = true; }
 		
-		$strFn .= '<option value="'.$valor.'" '.$selected.'>'.$nome.'</option>';
+		$strFn .= '<option value="'.$valor.'"'.$selected.'>'.$nome.'</option>';
 	}
 
 	if($nomeAtual != null && !$achou) $strFn .= '<option value="'.$valorAtual.'" selected>'.$nomeAtual.'</option>';

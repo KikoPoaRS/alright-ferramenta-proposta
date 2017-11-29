@@ -23,6 +23,29 @@ $(document).ready(function() {
 function aplicaMascarasCampos(){
     $('.mask-moeda').mask('000.000.000,00', {reverse: true});
     $('.mask-pct').mask('00,00', {reverse: true});
+
+    $('.mask-moeda').blur(alertaMascara);
+    $('.mask-pct').blur(alertaMascara);
+}
+
+function alertaMascara(){
+    validaMoeda($(this).val()); 
+}
+
+function validaMoeda(dsc,callext=null){
+    if(dsc != ''){ 
+        var ardsc = dsc.split(',');
+        var erro  = (callext ? callext+' c' : 'C')+'onsidere o valor com duas casas após a vírgula!';
+        if(ardsc.length != 2 || ardsc[0] == ''){
+            if(callext){
+               return erro;
+            } else {
+                 callModalMenor('DADO FORA DE FORMATAÇÃO!', erro);
+            }
+        } else {
+            if(callext) return '';
+        }
+    }
 }
 
 function inserirAtualizarRegra(idVeiculo, idTmp = 0, idFinal = 0, DADOS = null){
@@ -35,7 +58,7 @@ function inserirAtualizarRegra(idVeiculo, idTmp = 0, idFinal = 0, DADOS = null){
     var selectSegmentacoes = selectsItens['veiculo_'+idVeiculo].segmentacoes;
     var selectFormatos     = selectsItens['veiculo_'+idVeiculo].formatos;
     var selectsComprasTmp  = selectsCompras;
-
+    
     if(idFinal == 0){
         valInvest = valCub = valDesc = '';
 
@@ -46,14 +69,13 @@ function inserirAtualizarRegra(idVeiculo, idTmp = 0, idFinal = 0, DADOS = null){
         $TR = $('#registro-'+sf);
         IDC = '..';
 
-    } else {
-        
+    } else {        
         $TR = $('#registro-NOVO-'+idTmp); // <option>---</option><option value="Google Search">Google Search</option><option value="Google Display">Google Display</option>
-        
+     
         selectProdutos     = selectProdutos.replace('value="'+DADOS.produto+'"', 'value="'+DADOS.produto+'" selected');
         selectSegmentacoes = selectSegmentacoes.replace('value="'+DADOS.segmentacao+'"', 'value="'+DADOS.segmentacao+'" selected');
         selectFormatos     = selectFormatos.replace('value="'+DADOS.formato+'"', 'value="'+DADOS.formato+'" selected');
-        selectsComprasTmp  = selectsComprasTmp.replace('<option value="'+DADOS.tipo_compra_multiplicador+'">'+DADOS.tipo_compra_nome+'</option>', '<option value="'+DADOS.tipo_compra_multiplicador+'" selected>'+DADOS.tipo_compra_nome+'</option>');
+        selectsComprasTmp  = selectsComprasTmp.replace('value="'+DADOS.tipo_compra_multiplicador+'">'+DADOS.tipo_compra_nome, 'value="'+DADOS.tipo_compra_multiplicador+'" selected>'+DADOS.tipo_compra_nome);
         valInvest          = DADOS.investimento_minimo;
         valCub             = DADOS.custo_unit_bruto;
         valDesc            = DADOS.desconto_max;
@@ -92,8 +114,8 @@ function inserirAtualizarRegra(idVeiculo, idTmp = 0, idFinal = 0, DADOS = null){
         <td style="padding-top: 5px;">
             <div style="padding: 4px 0; text-align:center;">
                 <div style="padding: 4px 0; text-align:center;">
-                    <button onclick="editarExcluirRegra(0,${idVeiculo},'${nomeVeiculo}',${atualiza},${idNovo})" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Salvar registro"><i class="fa fa-save"></i></button>
-                    <button onclick="editarExcluirRegra(0,${idVeiculo},'${nomeVeiculo}',-1,${idNovo})" type="button" class="btn btn-round btn-danger bt-acoes" data-toggle="tooltip" data-placement="top" title="Excluir registro"> <span style="position:relative; top:-7px;">x</span> </button>
+                    <button onclick="editarExcluirRegra(${idFinal},${idVeiculo},'${nomeVeiculo}',${atualiza},${idNovo})" type="button" class="btn btn-round btn-info bt-acoes" data-toggle="tooltip" data-placement="top" title="Salvar registro"><i class="fa fa-save"></i></button>
+                    <button onclick="editarExcluirRegra(${idFinal},${idVeiculo},'${nomeVeiculo}',-1,${idNovo})" type="button" class="btn btn-round btn-danger bt-acoes" data-toggle="tooltip" data-placement="top" title="Excluir registro"> <span style="position:relative; top:-7px;">x</span> </button>
                 </div>
             </div>
         </td>
@@ -159,9 +181,14 @@ function editarExcluirRegra(id, idVeiculo, nomeVeiculo, operacao, novo = 0){
         if(dados.formato == '---' && erro == '') erro = 'Selecione um <strong>Formato</strong>!';
         if(dados.compra_nome == '---' && erro == '') erro = 'Selecione um <strong>Tipo de Compra</strong>!';
         if((dados.cub == '' || formataDado(dados.cub,'R$',true) == 0) && erro == '') erro = 'Defina um <strong>Custo Unitário Bruto</strong>!';
+      
+        if(dados.investimento_minimo != '' && erro == '') erro = validaMoeda(dados.investimento_minimo,'Para o <strong>investimento mínimo</strong>');
+        if(dados.cub != '' && erro == '') erro = validaMoeda(dados.cub,'Para o <strong>CUB</strong>');
+        if(dados.desconto_max != '' && erro == '') erro = validaMoeda(dados.desconto_max,'Para o <strong>desconto máximo</strong>');
+        
     }
 
-    erro == '' ? gravarDados(dados) : chamaModalFeedback('INFORMAÇ˜ÕES DE REGRAS INCOMPLETAS!', erro);
+    erro == '' ? gravarDados(dados) : chamaModalFeedback('INFORMAÇÕES DE REGRAS INCOMPLETAS!', erro);
 }
 
 
@@ -214,8 +241,8 @@ function callAjax(DADOS){
             console.log("Falha no AJAX! -- envio de dados página");
             // str = JSON.stringify(errorThrown, null, 4);
             // console.log('+++ '+errorThrown.responseText);
-            var saidaErr = _.unescape(errorThrown.responseText); 
-			window.open('about:blank').document.body.innerHTML = saidaErr;
+            // var saidaErr = _.unescape(errorThrown.responseText); 
+			// window.open('about:blank').document.body.innerHTML = saidaErr;
         } 
     });
 }
@@ -223,7 +250,7 @@ function callAjax(DADOS){
 
 function onDadosSalvos(data){ //console.log('>>>>> '+JSON.stringify(data, null, 4));
     if(!data.erro){
-        var op;
+        var op = ' criada ';
         if(data.operacao == CRIAR){
             inserirAtualizarRegra(data.idVeiculo,data.novo,data.idRegra,data.DADOS);// atualiza o id de cada novo item criado
         } else if(data.operacao == EXCLUIR){

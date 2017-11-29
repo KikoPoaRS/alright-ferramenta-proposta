@@ -411,6 +411,25 @@ var PeriodoProduto = (function(){
         return dadosPeriodo;
     }
 
+    fn.getValores = function(){
+        var dadosPeriodo = {};
+        var datas = this.getDatas();
+
+        dadosPeriodo.dataInit     = datas.fullInit; 
+        dadosPeriodo.dataFim      = datas.fullFim; 
+        dadosPeriodo.totalBruto   = 'R$ '+formataDado(parseFloat(this._totalCustoBruto));
+        dadosPeriodo.volume       = $('#per-volcontratado_'+this._periodoID).text();
+        dadosPeriodo.compra       = $('#per-tipocompra_'+this._periodoID).text();
+        dadosPeriodo.cub          = 'R$ '+$('#per-CUB_'+this._periodoID).text();
+        dadosPeriodo.cul          = 'R$ '+$('#per-CUL_'+this._periodoID).text();
+        dadosPeriodo.cubn         = 'R$ '+$('#per-CUBN_'+this._periodoID).text();
+        dadosPeriodo.culn         = 'R$ '+$('#per-CULN_'+this._periodoID).text();
+        dadosPeriodo.totalLiquido = 'R$ '+formataDado(parseFloat(this._totalCustoLiquido));
+        dadosPeriodo.desconto     = formataDado(this._$elmDesconto.val())+'%';
+
+        return dadosPeriodo;
+    }
+
     fn.getID = function (){ return this._periodoID; }
 
     fn.getDatas = function (salvar = false){
@@ -983,6 +1002,20 @@ var ProdutoVeiculo = (function(){
         return DADOS;
     }
 
+
+    fn.getPeriodos = function(){
+        var periodos = [];
+        
+        if(this._listaPeriodos.length > 0){
+            for(var i=0; i<this._listaPeriodos.length; i++){
+                var p = this._listaPeriodos[i];
+                periodos.push(p.getValores());
+            }
+        }
+
+        return periodos;
+    }
+
     fn.excluirProduto = function(excluiMacro=false){
         this._excluiPeriodos(false,excluiMacro);
         this._$elementoProduto.remove();
@@ -1324,6 +1357,7 @@ var CardVeiculo = (function (){
     fn.getID    = function (){ return this._veiculoID; }
     fn.getNome  = function (){ return this._veiculoNome; }
     fn.getAtivo = function (){ return this._ativo; }
+    fn.getCor = function (){ return this._veiculoCor; }
 
     fn.getDados = function (){
         var DADOS = [];
@@ -1342,6 +1376,32 @@ var CardVeiculo = (function (){
         }
 
         return DADOS;
+    }
+
+    fn.getProdutos = function(){
+        var produtos = [];
+
+        if(this._produtosAtivos.length > 0){
+            for(var i=0; i<this._produtosAtivos.length; i++){
+                var p = this._produtosAtivos[i];
+                var dados = {};
+                var datas = p.getDatas();
+                
+                dados.nome = p.getNome();
+                dados.datas = 'de '+datas.dataInit+' a '+datas.dataFim;
+                dados.investimento = 'R$ '+ formataDado(p.getInvestimento());
+                dados.segmento = $('#select-produto-segmentacao_'+p.getID()+'  option:selected').text();
+                dados.target = $('#target_'+p.getID()).val();
+                dados.praca = $('#praca_'+p.getID()).val();
+                dados.formato = $('#formato-pr_'+p.getID()+'  option:selected').text();
+
+                dados.periodos = p.getPeriodos();
+
+                produtos.push(dados);
+            }
+        }
+
+        return produtos;
     }
     
     fn.getInvestimentoTotal = function(){

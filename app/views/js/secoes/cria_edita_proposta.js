@@ -1,6 +1,8 @@
 
 
 var arqCriaEdita       = __BASESITE__+'/app/functions/cria_edita_propostas_ajax.php';
+var arqExportExcel     = __BASESITE__+'/app/functions/export_excel.php';
+var caminhoExcel       = __BASESITE__+'/app/functions/exports/';
 var todosVeiculos      = listaVeiculos;
 var VEICULOS           = [];
 var CONTA_NOVO         =  0;
@@ -85,6 +87,68 @@ function salvarProposta(){
     erro == '' ? gravarDados(DADOS) : chamaModalFeedback('<span style="color:red;">NÃO FOI POSSÍVEL SALVAR A PROPOSTA!</span>',erro);
 }
 
+function exportarProposta(){
+
+    if(IDProposta > 0){
+        var DADOS = {};
+        DADOS.idProposta   = IDProposta;
+        DADOS.agencia      = $('#proposta-agencia option:selected').text();
+        DADOS.cliente      = $('#proposta-cliente option:selected').text();
+        DADOS.titulo       = $('#proposta-titulo').val();
+        DADOS.contato      = $('#proposta-contato').val();
+        DADOS.periodo      = $('#periodo-proposta').text().toLowerCase();
+        DADOS.investimento = 'R$ '+$('#valor-total-proposta').text();
+        
+        if(VEICULOS.length>0){
+            DADOS.veiculos = [];
+            for(var i=0; i<VEICULOS.length; i++){
+                var v = VEICULOS[i];
+                
+                if(v.getAtivo()){ 
+                    var dadosVeiculo = {};
+                    var datas      = v.getDatas();
+                    dadosVeiculo.nome         = v.getNome().toUpperCase();
+                    dadosVeiculo.cor          = v.getCor().replace('#','');
+                    dadosVeiculo.datas        = 'de '+datas.dataInit+' a '+datas.dataFim;
+                    dadosVeiculo.investimento = 'R$ '+formataDado(v.getInvestimentoTotal());
+                    dadosVeiculo.produtos     = v.getProdutos();
+                    DADOS.veiculos.push(dadosVeiculo);
+                }
+            } 
+        }
+        // console.clear(); console.log('>>>>> '+JSON.stringify(DADOS, null, 4));
+        
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: arqExportExcel,
+            data: DADOS,
+            cache: false,
+            success: function (data){
+                if(data.erro){
+                    chamaModalFeedback('<span style="color:red;">NÃO FOI POSSÍVEL EXPORTAR A PROPOSTA!</span>',data.erro);
+                } else {
+                    var $a = $("<a>");
+                    $a.attr("href",caminhoExcel+data.arquivo);
+                    $("body").append($a);
+                    $a.attr("download",'proposta_alright.xlsx');
+                    $a[0].click();
+                    $a.remove();
+                }
+            },
+            error: function(errorThrown){
+                console.log("Falha no AJAX! -- envio de dados página");
+                str = JSON.stringify(errorThrown, null, 4);
+                console.log('+++ '+errorThrown.responseText);
+                // var saidaErr = _.unescape(errorThrown.responseText); 
+                // window.open('about:blank').document.body.innerHTML = saidaErr;
+            } 
+        });
+    }
+
+    
+}
+
 function excluirProposta(){
     // TODO ///////////////////
     if(IDProposta == 0){
@@ -121,7 +185,6 @@ function chamaModalFeedback(tit,msg){
         callModalMenor(tit,msg);
     }
 }
-
 
 function callAjax(DADOS){
     $.ajax({
