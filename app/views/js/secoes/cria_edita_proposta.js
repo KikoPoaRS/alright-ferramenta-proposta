@@ -94,7 +94,7 @@ function exportarProposta(){
         DADOS.idProposta   = IDProposta;
         DADOS.agencia      = $('#proposta-agencia option:selected').text();
         DADOS.cliente      = $('#proposta-cliente option:selected').text();
-        DADOS.titulo       = $('#proposta-titulo').val();
+        DADOS.titulo       = $('#proposta-titulo').val().toUpperCase();
         DADOS.contato      = $('#proposta-contato').val();
         DADOS.periodo      = $('#periodo-proposta').text().toLowerCase();
         DADOS.investimento = 'R$ '+$('#valor-total-proposta').text();

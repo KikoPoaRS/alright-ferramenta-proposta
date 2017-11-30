@@ -110,6 +110,10 @@ if(isset($_POST['IDProposta'])){
                 // exclui dados dos perídos
                 propostas_periodo::delete_all(array('conditions'=>array('propostas_id = ?',$_POST['IDProposta'])));
 
+                // se tiver arquivo de excel, exclui
+                $arquivo = 'exports/'.$_POST['IDProposta'].'.xlsx';
+                if(file_exists($arquivo)) unlink($arquivo);
+
                 // exclui dados do cabecalho da proposta
                 ////////////////////////////////////////////
                 $PROPOSTA->delete();                      //
