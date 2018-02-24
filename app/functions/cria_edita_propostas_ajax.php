@@ -161,12 +161,12 @@ if(isset($_POST['IDProposta'])){
 
         if(count($veiculo)>0){
             propostas_periodo::delete_all(array('conditions'=>$criterios));
-            $saida['excluiVeiculo'] = 1;
-        } else {
-            $saida['erro'] = 'O registro deste veíuclo não foi encontrado no banco';
-        }
+           // $saida['excluiVeiculo'] = 1;
+        } //else {
+            //$saida['erro'] = 'O registro deste veíuclo não foi encontrado no banco';
+        //}
 
-
+        $saida['excluiVeiculo'] = 1;
 
 
     } else if(isset($_POST['carregaVeiculo'])) {

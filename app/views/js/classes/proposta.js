@@ -100,11 +100,11 @@ var BtVeiculo = (function(){
 var PeriodoProduto = (function(){
     // construtor
     function PeriodoProduto(vid, linha, grupo, idproduto, regras, container, dados = null){
-        // objeto com as regras recebidas - id | nome | descontoMax | investMinimo | tipoCompra | CUB | CUL      
+        // objeto com as regras recebidas - id | nome | descontoMax | investMinimo | tipoCompra | CUB | CUL  
         this._DADOS             = dados;               
         this._veiculoID         = vid;
         this._regrasPeriodo     = regras;
-        this._regrasPeriodo.CUB = parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
+        this._CUB = parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
         this._produtoID         = idproduto;
         this._grupo             = grupo;
         this._linha             = linha;
@@ -113,15 +113,15 @@ var PeriodoProduto = (function(){
         this._$container        = $('#'+container);
 
         this._listaMeses        = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-        this._listaAnos         = [17,25]; // ano inicial e ano final. O algoritmo deverá fazer a interpolação entre os anos
+        this._listaAnos         = [17,27]; // ano inicial e ano final. O algoritmo deverá fazer a interpolação entre os anos
         this._listaDiasMeses    = [31,28,31,30,31,30,31,31,30,31,30,31];
         this._selectMeses       = '';
         this._selectAnos        = '';
     
-        // define valores default para mes ativo e ano ativo
+        // define valores default para mes ativo e ano ativo var anovg
         // this._mesAtivo          = this._listaMeses[parseInt((new Date).getMonth())];
         this._mesAtivo          = dados ? dados.dataInit.split('/')[1] : (new Date).getMonth()+1;
-        this._anoAtivo          = dados ? dados.dataInit.split('/')[2] : String((new Date).getFullYear()).substring(2,4);
+        this._anoAtivo          = dados ? dados.dataInit.split('/')[2] : '20'+String((new Date).getFullYear()).substring(2,4);
         this._diaInit           = dados ? dados.dataInit.split('/')[0] : (new Date).getDay();                  
         this._diaFim            = dados ? dados.dataFim.split('/')[0] : (new Date).getDay() <= 15 ? 15 : this._listaDiasMeses[this._mesAtivo-1];   // valor default
         this._totalCustoBruto   = dados ? dados.totBruto : 0;
@@ -155,7 +155,7 @@ var PeriodoProduto = (function(){
 
         for(var i=this._listaAnos[0]; i<this._listaAnos[1]+1; i++){
             var anos = i;
-            var selected = this._anoAtivo == anos ? 'selected' : '';
+            var selected = this._anoAtivo == '20'+anos ? 'selected' : '';
             this._selectAnos += '<option value="20'+anos+'"'+selected+'>'+anos+'</option>';;
         }
 
@@ -183,7 +183,7 @@ var PeriodoProduto = (function(){
     var fn = PeriodoProduto.prototype;
     
     // métodos privados
-    fn._anoBissexto = function(ano){ return ((parseInt(ano) % 4) == 0 && (parseInt(ano) % 100)!=0) || ((parseInt(ano) % 100)!=0 ) }
+    fn._anoBissexto = function(ano){ return ((parseInt(ano) % 4 == 0) && ((parseInt(ano) % 100 != 0) || (parseInt(ano) % 400 == 0))); }
 
     fn._renderPeriodo = function(){
         var valCustoBruto = '';
@@ -197,10 +197,10 @@ var PeriodoProduto = (function(){
         var elemPeriodo = `
         <tr id="periodo_${this._periodoID}">
             <td style="padding-left:0; padding-right:0">
-                <select id="per-select-mes_${this._periodoID}" class="form-control select-menor" style="width:43px; height:25px; padding-right:0">${this._selectMeses}</select>
+                <select id="per-select-mes_${this._periodoID}" class="form-control select-menor" style="width:53px; height:25px; padding:5px">${this._selectMeses}</select>
             </td>
             <td style="padding-left:0">
-                <select id="per-select-ano_${this._periodoID}" class="form-control select-menor" style="width:36px; height:25px;">${this._selectAnos}</select>
+                <select id="per-select-ano_${this._periodoID}" class="form-control select-menor" style="width:46px; height:25px; padding:5px">${this._selectAnos}</select>
             </td>
             <td style="padding-bottom:0; min-width:120px;">
                 <input type="text" id="per-slider_${this._periodoID}" name="per-slider_${this._periodoID}" value="" />
@@ -283,7 +283,7 @@ var PeriodoProduto = (function(){
 
         // ativa slider de datas
         this._$elmSliderDias.ionRangeSlider({type: "double", min: 1, max: 31, from: this._diaInit, to: this._diaFim, onFinish: this._onSliderDias, self:this});// grid: true,
-        this._atualizaInfosSliderDias();
+        // this._atualizaInfosSliderDias();
 
         // ativa bt excluir
        
@@ -313,10 +313,10 @@ var PeriodoProduto = (function(){
     fn._atualizaInfosSliderDias = function(){
         var posmes  = this._listaMeses.indexOf(this._$elmSelectMeses.val());
         var diasmes = this._listaDiasMeses[posmes];
-
+        
         if(posmes == 1 && this._anoBissexto(this._$elmSelectAnos.val())) diasmes = 29;
         if(this._diaFim > diasmes) this._diaFim = diasmes;
-        
+            
         var sliderDias = this._$elmSliderDias.data("ionRangeSlider");
 
         sliderDias.update({
@@ -337,7 +337,7 @@ var PeriodoProduto = (function(){
     fn.aplicaRegras = function(regras){
         if(regras) {
             this._regrasPeriodo = regras;
-            this._regrasPeriodo.CUB =  parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
+            if(this._regrasPeriodo.CUB.indexOf(",")>=0) this._CUB = parseFloat(formataDado(this._regrasPeriodo.CUB,'R$',true));
         }
 
         var descontoCliente = $inputDescClientes.val() == 0 || $inputDescClientes.val() == '' ? 20 : parseFloat(formataDado($inputDescClientes.val(),'R$',true));
@@ -345,8 +345,8 @@ var PeriodoProduto = (function(){
         // this._regrasPeriodo.nome | .descontoMax | .investMinimo | .tipoCompra | .CUB | .CUL
         this._totalCustoBruto   = this._$elmTotBruto.val() == '' ? 0 : parseFloat(formataDado(this._$elmTotBruto.val(),'R$',true));
         this._desconto          = this._$elmDesconto.val() == '' ? 0 : parseFloat(formataDado(this._$elmDesconto.val(),'R$',true));
-        this._regrasPeriodo.CUL = (this._regrasPeriodo.CUB * (1-(descontoCliente/100))).toFixed(2);
-        this._CUB_N             = (this._regrasPeriodo.CUB * (1-(this._desconto/100))).toFixed(2);
+        this._regrasPeriodo.CUL = (this._CUB * (1-(descontoCliente/100))).toFixed(2);
+        this._CUB_N             = (this._CUB * (1-(this._desconto/100))).toFixed(2);
         this._CUL_N             = (this._regrasPeriodo.CUL * (1-(this._desconto/100))).toFixed(2);
         this._totalCustoLiquido = (this._totalCustoBruto   * (1-(descontoCliente/100))).toFixed(2);
         this._volumeContratado  = parseInt(Math.round(this._totalCustoBruto / this._CUB_N) * this._regrasPeriodo.tipoCompra[1]);
@@ -363,7 +363,7 @@ var PeriodoProduto = (function(){
         this._$elmTipoCompra.append(this._regrasPeriodo.tipoCompra[0]);
 
         this._$elmCUB.empty();
-        this._$elmCUB.append(formataDado(this._regrasPeriodo.CUB));
+        this._$elmCUB.append(formataDado(this._CUB));
 
         this._$elmCUL.empty();
         this._$elmCUL.append(formataDado(this._regrasPeriodo.CUL));
@@ -425,7 +425,7 @@ var PeriodoProduto = (function(){
         dadosPeriodo.cubn         = 'R$ '+$('#per-CUBN_'+this._periodoID).text();
         dadosPeriodo.culn         = 'R$ '+$('#per-CULN_'+this._periodoID).text();
         dadosPeriodo.totalLiquido = 'R$ '+formataDado(parseFloat(this._totalCustoLiquido));
-        dadosPeriodo.desconto     = formataDado(this._$elmDesconto.val())+'%';
+        dadosPeriodo.desconto     = (this._$elmDesconto.val()==''?'0':this._$elmDesconto.val())+'%';
 
         return dadosPeriodo;
     }
@@ -805,12 +805,12 @@ var ProdutoVeiculo = (function(){
                     <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding: 0;">
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 35px;">Target</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <input id="target_${this._produtoID}" type="text" placeholder="Digite o target" class="form-control" value="${this._target}">
+                            <input id="target_${this._produtoID}" type="text" placeholder="Digite o target" class="form-control" value="${this._target}" maxlength="250">
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 33px;">Praça</label>
                         <div class="col-sm-2 colunas-form-produtos form-group">
-                            <input id="praca_${this._produtoID}" type="text" placeholder="Digite a praça" class="form-control" value="${this._praca}">
+                            <input id="praca_${this._produtoID}" type="text" placeholder="Digite a praça" class="form-control" value="${this._praca}" maxlength="250">
                         </div>
                         
                         <label class="col-sm-1 colunas-label-produtos form-group" style="width: 47px;">Formato</label>
@@ -832,7 +832,7 @@ var ProdutoVeiculo = (function(){
                     <table class="table">
                         <thead>
                             <tr>
-                            <th style="width:47px; padding-right:0">Mês</th>
+                            <th style="width:57px; padding-right:0">Mês</th>
                             <th style="width:47px;">Ano</th>
                             <th>Dias</th>
                             <th style="min-width:85px;">Tot. bruto (R$)</th>
@@ -878,7 +878,7 @@ var ProdutoVeiculo = (function(){
             }
         })
 
-        $('#formato_'+this._produtoID).on('change', function() { 
+        this._$elmSelectFormatos.on('change', function() {
             if(this.value != ""){
                 self._aplicarFormato(this.value);
             }
@@ -1099,6 +1099,9 @@ var CardVeiculo = (function (){
                         }
                     }
                 }
+                
+                document.dispatchEvent(new CustomEvent("eventoAtualizaDadosCabecalhoProposta"));
+
             } else {
                 chamaModalFeedback('<span style="color:red;">ERRO DE OPERAÇÃO</span>', data.erro);
             }

@@ -27,7 +27,7 @@
             {% for veiculo in listaVeiculos %}
             <div class="x_panel {% if loop.index > 1 %} collapsed {% endif %}" style="border-left: 5px solid {{veiculo.cor}};{% if loop.index > 1 %} margin-top: 20px;{% endif %}">
                 <div class="x_title" style="padding:0; ">
-                    <img class="logo-ico-veiculo" src="{{ __BASEHTML__ }}imgs/{{veiculo.thumb}}">
+                    <img class="logo-ico-veiculo" src="{{ __BASEHTML__ }}imgs/{{veiculo.imagem}}">
                     <h2>{{veiculo.nome}}</h2>
                     <ul class="nav navbar-right panel_toolbox">
                         <li><a id="cl-${this._veiculoID}" class="collapse-link"><i class="fa fa-chevron-up"></i></a>

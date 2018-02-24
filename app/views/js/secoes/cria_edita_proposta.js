@@ -131,7 +131,8 @@ function exportarProposta(){
                     var $a = $("<a>");
                     $a.attr("href",caminhoExcel+data.arquivo);
                     $("body").append($a);
-                    $a.attr("download",'proposta_alright.xlsx');
+                    $arquivo = DADOS.agencia+'-'+DADOS.cliente+'-'+DADOS.titulo;
+                    $a.attr("download",$arquivo+'.xlsx');
                     $a[0].click();
                     $a.remove();
                 }
@@ -237,14 +238,15 @@ function msgErrProp(idp){
     );
 }
 
-var propostaDataInit = '';
-var propostaDataFim  = '';
+
 
 $(document).ready(function() {
     document.addEventListener('eventoAtualizaDadosCabecalhoProposta',function (e) { 
         var total   = 0;
         var periodo = '---';
         var umAtivo = false;
+        var propostaDataInit = '';
+        var propostaDataFim  = '';
 
         $('#periodo-proposta').empty();
         $('#valor-total-proposta').empty();
@@ -259,16 +261,15 @@ $(document).ready(function() {
                     // compara datas
                     var datas = v.getDatas();
 
-                    if(datas.dataInit != '--' && datas.dataFim != '--'){
+                    if(datas.dataInit != '--' && datas.dataFim != '--'){                 
                         if(propostaDataInit == ''){
                             propostaDataInit = datas.dataInit;
                             propostaDataFim  = datas.dataFim;
-                        } else { //console.log(v.getNome()+' -- dataInit: '+datas.dataInit+' | dataFim: '+datas.dataFim);
+                        } else {//console.log(v.getNome()+' -- dataInit: '+datas.dataInit+' | dataFim: '+datas.dataFim);
                             if(comparaDatas(datas.dataInit,propostaDataInit,'<')) propostaDataInit = datas.dataInit;
                             if(comparaDatas(datas.dataFim,propostaDataFim,'>')) propostaDataFim = datas.dataFim;
-                        }
-                    }
-                    
+                        }                     
+                    }             
                     // soma valores
                     total += parseFloat(v.getInvestimentoTotal());
                 }

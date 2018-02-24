@@ -61,6 +61,11 @@ if(isset($_POST['idProposta']) && $_POST['idProposta']>0){
     $sheet->getStyle('C2')->getFont()->setBold(true);
     $sheet->setCellValue('C2', 'PROPOSTA - '.$_POST['titulo']);
 
+    $sheet->mergeCells('F4:'.$limiteChar.'4');
+    $sheet->getStyle('F4:'.$limiteChar.'4')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+    $sheet->getStyle('F4:'.$limiteChar.'4')->applyFromArray(['font'=>['color'=>['rgb'=>'909090']]]);
+    $sheet->setCellValue('F4', '* CUB : Custo Unitário Bruto | CUL : Custo Unitário Líquido | CUBN : Custo Unitário Bruto - Negociado | CULN : Custo Unitário Líquido - Negociado');
+
     $sheet->mergeCells('B4:C4');
     $sheet->mergeCells('B5:C5');
     $sheet->mergeCells('B6:C6');
@@ -68,12 +73,17 @@ if(isset($_POST['idProposta']) && $_POST['idProposta']>0){
     $sheet->getStyle('B4:C6')->getFont()->setBold(true);
     $sheet->setCellValue('B4', 'Agência / Cliente: ');
     $sheet->setCellValue('B5', 'Período total: ');
-    $sheet->setCellValue('B6', 'Investimento total: ');
+    $sheet->setCellValue('B6', 'Investimento total bruto: ');
     $sheet->setCellValue('D4', $_POST['agencia'].' / '.$_POST['cliente']);
     $sheet->setCellValue('D5', $_POST['periodo']);
     $sheet->setCellValue('D6', $_POST['investimento']);
 
-    if(isset($_POST['veiculos'])) renderVeiculos($sheet,$_POST['veiculos'],$limiteChar);
+    // if(isset($_POST['veiculos'])) renderVeiculos($sheet,$_POST['veiculos'],$limiteChar);
+    $linha = isset($_POST['veiculos']) ? renderVeiculos($sheet,$_POST['veiculos'],$limiteChar) : 9;
+    $rodape = 'B'.$linha.':'.$limiteChar.$linha;
+    $sheet->mergeCells($rodape);
+    $sheet->getStyle($rodape)->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+    $sheet->setCellValue('B'.$linha, 'Validade da proposta: 15 dias  |  Prazo de pagamento: 30 DFM ');
 
     // exporta os dados
 
@@ -133,7 +143,7 @@ function renderVeiculos($sheet,$veics,$limite,$linha=8){
         $sheet->getStyle($cellHead)->getFill()->setFillType(PHPExcel_Style_Fill::FILL_SOLID)->getStartColor()->setRGB('666666');
         $sheet->getStyle($cellHead)->applyFromArray($invertFont);
         $sheet->getStyle($cellHead)->applyFromArray(bordaCor('acacac'));
-        $sheet->fromArray(['Produto','Segmento','Target','Preça','Formato','Início','Fim','Tot. Bruto','Volume','Compra','CUB','CUL','Desc.','CUBN','CULN','Tot. Liq.'], NULL, 'B'.$linha);
+        $sheet->fromArray(['Produto','Segmento','Target','Praça','Formato','Início','Fim','Tot. Bruto','Volume','Compra','CUB*','CUL*','Desc.','CUBN*','CULN*','Tot. Liq.'], NULL, 'B'.$linha);
         
         $ctBloco = 0;
         foreach($v['produtos'] as $prod){
@@ -154,6 +164,7 @@ function renderVeiculos($sheet,$veics,$limite,$linha=8){
             $sheet->fromArray([$prod['nome'],$prod['segmento'],$prod['target'],$prod['praca'],$prod['formato']], NULL, 'B'.$linha);
 
             foreach($periodos as $p){
+                $p['volume'] .= ' '; //str_replace(',','.',$p['volume']);
                 $sheet->getRowDimension($linha)->setRowHeight(18);
                 $sheet->fromArray([$p['dataInit'],$p['dataFim'],$p['totalBruto'],$p['volume'],$p['compra'],$p['cub'],$p['cul'],$p['desconto'],$p['cubn'],$p['culn'],$p['totalLiquido']], NULL, 'G'.$linha);
                 ++$linha;
@@ -173,6 +184,7 @@ function renderVeiculos($sheet,$veics,$limite,$linha=8){
         
         $linha +=2;
     }
+    return $linha + 1;
 }
 
 

@@ -4173,6 +4173,10 @@ ul.notifications {
 }
 */
 
+select {
+    padding: 4px !important;
+}
+
 .main_menu .label {
     line-height: 11px;
     margin-top: 4px;
